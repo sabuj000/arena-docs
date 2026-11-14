@@ -58,6 +58,8 @@ Send an `Idempotency-Key` header so a retry never charges twice.
   ]}
 />
 
+<CodeGroup>
+
 ```bash
 curl https://api.arena.example/v1/purchases \
   -H "Authorization: Bearer sk_test_YOUR_KEY" \
@@ -65,6 +67,69 @@ curl https://api.arena.example/v1/purchases \
   -H "Content-Type: application/json" \
   -d '{"player_id": "plr_123", "item_id": "itm_gold_pack", "quantity": 1, "payment_token": "tok_test_success"}'
 ```
+
+```ts
+const res = await fetch('https://api.arena.example/v1/purchases', {
+  method: 'POST',
+  headers: {
+    Authorization: `Bearer ${process.env.ARENA_SECRET_KEY}`,
+    'Idempotency-Key': 'purchase-0001',
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    player_id: 'plr_123',
+    item_id: 'itm_gold_pack',
+    quantity: 1,
+    payment_token: 'tok_test_success',
+  }),
+})
+const purchase = await res.json()
+```
+
+```python
+import os
+import requests
+
+res = requests.post(
+    "https://api.arena.example/v1/purchases",
+    headers={
+        "Authorization": f"Bearer {os.environ['ARENA_SECRET_KEY']}",
+        "Idempotency-Key": "purchase-0001",
+    },
+    json={
+        "player_id": "plr_123",
+        "item_id": "itm_gold_pack",
+        "quantity": 1,
+        "payment_token": "tok_test_success",
+    },
+    timeout=10,
+)
+purchase = res.json()
+```
+
+```php
+<?php
+$ch = curl_init('https://api.arena.example/v1/purchases');
+curl_setopt_array($ch, [
+    CURLOPT_POST => true,
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_HTTPHEADER => [
+        'Authorization: Bearer ' . getenv('ARENA_SECRET_KEY'),
+        'Idempotency-Key: purchase-0001',
+        'Content-Type: application/json',
+    ],
+    CURLOPT_POSTFIELDS => json_encode([
+        'player_id' => 'plr_123',
+        'item_id' => 'itm_gold_pack',
+        'quantity' => 1,
+        'payment_token' => 'tok_test_success',
+    ]),
+]);
+$purchase = json_decode(curl_exec($ch), true);
+curl_close($ch);
+```
+
+</CodeGroup>
 
 Returns `201` and the purchase. Sends `purchase.completed` when it succeeds.
 

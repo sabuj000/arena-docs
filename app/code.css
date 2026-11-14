@@ -1,0 +1,151 @@
+/* Code blocks: header with language label or tabs, copy button, syntax colors. */
+
+:root {
+  --tok-comment: #656d7e;
+  --tok-string: #0a6b37;
+  --tok-keyword: #7a3ec6;
+  --tok-number: #a64f00;
+  --tok-key: #1f4fbf;
+  --tok-flag: #0b6e99;
+  --tok-var: #9a3b8c;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --tok-comment: #8b93a7;
+    --tok-string: #7ee2a0;
+    --tok-keyword: #c4a1ff;
+    --tok-number: #ffb86b;
+    --tok-key: #8db4ff;
+    --tok-flag: #6fd3f0;
+    --tok-var: #f08fd8;
+  }
+}
+
+.tok-comment { color: var(--tok-comment); font-style: italic; }
+.tok-string { color: var(--tok-string); }
+.tok-keyword { color: var(--tok-keyword); }
+.tok-number { color: var(--tok-number); }
+.tok-key { color: var(--tok-key); }
+.tok-flag { color: var(--tok-flag); }
+.tok-var { color: var(--tok-var); }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.codeblock {
+  margin: 16px 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--code-bg);
+  overflow: hidden;
+}
+
+.codeblock-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 8px 4px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.codeblock-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.codeblock-tabs {
+  display: flex;
+  gap: 2px;
+  min-width: 0;
+  margin-left: -6px;
+  overflow-x: auto;
+}
+
+.code-tab {
+  flex: none;
+  min-height: 36px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.code-tab:hover {
+  color: var(--fg);
+}
+
+.code-tab[aria-selected='true'] {
+  background: var(--note-bg);
+  color: var(--accent);
+}
+
+.copy-button {
+  flex: none;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.copy-button:hover {
+  border-color: var(--accent);
+}
+
+.copy-button[data-state='copied'] {
+  color: var(--tok-string);
+  border-color: var(--tok-string);
+}
+
+.copy-button[data-state='failed'] {
+  color: #cf222e;
+  border-color: #cf222e;
+}
+
+.content .codeblock pre {
+  margin: 0;
+  padding: 14px 16px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.content .codeblock pre code {
+  background: none;
+  padding: 0;
+}
+
+@media (pointer: coarse) {
+  .code-tab,
+  .copy-button {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 640px) {
+  .content .codeblock pre {
+    padding: 12px;
+    font-size: 0.8rem;
+  }
+}
