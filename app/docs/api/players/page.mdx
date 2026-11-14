@@ -44,72 +44,7 @@ Creates a player. Send an `Idempotency-Key` header.
   ]}
 />
 
-<CodeGroup>
-
-```bash
-curl https://api.arena.example/v1/players \
-  -H "Authorization: Bearer sk_test_YOUR_KEY" \
-  -H "Idempotency-Key: player-create-0001" \
-  -H "Content-Type: application/json" \
-  -d '{"display_name": "NovaKnight", "metadata": {"region": "ap-south"}}'
-```
-
-```ts
-const res = await fetch('https://api.arena.example/v1/players', {
-  method: 'POST',
-  headers: {
-    Authorization: `Bearer ${process.env.ARENA_SECRET_KEY}`,
-    'Idempotency-Key': 'player-create-0001',
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({
-    display_name: 'NovaKnight',
-    metadata: { region: 'ap-south' },
-  }),
-})
-const player = await res.json()
-```
-
-```python
-import os
-import requests
-
-res = requests.post(
-    "https://api.arena.example/v1/players",
-    headers={
-        "Authorization": f"Bearer {os.environ['ARENA_SECRET_KEY']}",
-        "Idempotency-Key": "player-create-0001",
-    },
-    json={
-        "display_name": "NovaKnight",
-        "metadata": {"region": "ap-south"},
-    },
-    timeout=10,
-)
-player = res.json()
-```
-
-```php
-<?php
-$ch = curl_init('https://api.arena.example/v1/players');
-curl_setopt_array($ch, [
-    CURLOPT_POST => true,
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_HTTPHEADER => [
-        'Authorization: Bearer ' . getenv('ARENA_SECRET_KEY'),
-        'Idempotency-Key: player-create-0001',
-        'Content-Type: application/json',
-    ],
-    CURLOPT_POSTFIELDS => json_encode([
-        'display_name' => 'NovaKnight',
-        'metadata' => ['region' => 'ap-south'],
-    ]),
-]);
-$player = json_decode(curl_exec($ch), true);
-curl_close($ch);
-```
-
-</CodeGroup>
+<Snippets operation="POST /players" />
 
 ```json
 {
@@ -135,10 +70,7 @@ Returns `201` and the player. Errors:
 
 <Endpoint method="GET" path="/v1/players/{player_id}" />
 
-```bash
-curl https://api.arena.example/v1/players/plr_123 \
-  -H "Authorization: Bearer sk_test_YOUR_KEY"
-```
+<Snippets operation="GET /players/{player_id}" />
 
 Returns the player, or `404` with the code `player_not_found`.
 
@@ -156,12 +88,7 @@ Changes only the fields you send. Sending `metadata` merges keys. Set a key to `
   ]}
 />
 
-```bash
-curl -X PATCH https://api.arena.example/v1/players/plr_123 \
-  -H "Authorization: Bearer sk_test_YOUR_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"status": "suspended"}'
-```
+<Snippets operation="PATCH /players/{player_id}" />
 
 ## Delete a player
 
@@ -173,10 +100,7 @@ Deletes the player and their inventory, scores and achievements. A `player.delet
   Deletion is permanent. Purchase records are kept for accounting, with the player reference removed.
 </Callout>
 
-```bash
-curl -X DELETE https://api.arena.example/v1/players/plr_123 \
-  -H "Authorization: Bearer sk_test_YOUR_KEY"
-```
+<Snippets operation="DELETE /players/{player_id}" />
 
 ```json
 { "id": "plr_123", "object": "player", "deleted": true }
@@ -197,7 +121,4 @@ Returns players, newest first. See [Pagination](/docs/api/conventions#pagination
   ]}
 />
 
-```bash
-curl "https://api.arena.example/v1/players?display_name=NovaKnight" \
-  -H "Authorization: Bearer sk_test_YOUR_KEY"
-```
+<Snippets operation="GET /players" />

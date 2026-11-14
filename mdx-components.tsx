@@ -5,6 +5,7 @@ import { Card, CardGroup } from './components/Card'
 import { CodeBlock } from './components/CodeBlock'
 import { CodeGroup } from './components/CodeGroup'
 import { Callout } from './components/Callout'
+import { Snippets } from './components/Snippets'
 import { Endpoint } from './components/Endpoint'
 import { ParamTable } from './components/ParamTable'
 
@@ -30,6 +31,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     Callout,
     Endpoint,
     ParamTable,
+    Snippets,
     ...components,
   }
 }

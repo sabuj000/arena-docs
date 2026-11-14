@@ -78,6 +78,15 @@
               }
             }
           }
+        },
+        "x-example": {
+          "idempotencyKey": "player-create-0001",
+          "body": {
+            "display_name": "NovaKnight",
+            "metadata": {
+              "region": "ap-south"
+            }
+          }
         }
       },
       "get": {
@@ -138,6 +147,11 @@
               }
             }
           }
+        },
+        "x-example": {
+          "query": {
+            "display_name": "NovaKnight"
+          }
         }
       }
     },
@@ -173,6 +187,11 @@
                 }
               }
             }
+          }
+        },
+        "x-example": {
+          "path": {
+            "player_id": "plr_123"
           }
         }
       },
@@ -232,6 +251,14 @@
               }
             }
           }
+        },
+        "x-example": {
+          "path": {
+            "player_id": "plr_123"
+          },
+          "body": {
+            "status": "suspended"
+          }
         }
       },
       "delete": {
@@ -260,6 +287,11 @@
                 }
               }
             }
+          }
+        },
+        "x-example": {
+          "path": {
+            "player_id": "plr_123"
           }
         }
       }
@@ -315,6 +347,13 @@
                 ]
               }
             }
+          }
+        },
+        "x-example": {
+          "idempotencyKey": "match-create-0001",
+          "body": {
+            "mode": "ranked",
+            "max_players": 2
           }
         }
       },
@@ -378,6 +417,11 @@
               }
             }
           }
+        },
+        "x-example": {
+          "query": {
+            "status": "active"
+          }
         }
       }
     },
@@ -413,6 +457,11 @@
                 }
               }
             }
+          }
+        },
+        "x-example": {
+          "path": {
+            "match_id": "mch_77"
           }
         }
       }
@@ -475,6 +524,15 @@
               }
             }
           }
+        },
+        "x-example": {
+          "path": {
+            "match_id": "mch_77"
+          },
+          "idempotencyKey": "join-mch_77-plr_456",
+          "body": {
+            "player_id": "plr_456"
+          }
         }
       }
     },
@@ -511,6 +569,12 @@
               }
             }
           }
+        },
+        "x-example": {
+          "path": {
+            "match_id": "mch_77"
+          },
+          "idempotencyKey": "start-a-match-0001"
         }
       }
     },
@@ -587,6 +651,26 @@
               }
             }
           }
+        },
+        "x-example": {
+          "path": {
+            "match_id": "mch_77"
+          },
+          "idempotencyKey": "match-end-0001",
+          "body": {
+            "results": [
+              {
+                "player_id": "plr_123",
+                "placement": 1,
+                "score": 4200
+              },
+              {
+                "player_id": "plr_456",
+                "placement": 2,
+                "score": 3100
+              }
+            ]
+          }
         }
       }
     },
@@ -623,6 +707,12 @@
               }
             }
           }
+        },
+        "x-example": {
+          "path": {
+            "match_id": "mch_77"
+          },
+          "idempotencyKey": "cancel-a-match-0001"
         }
       }
     },
@@ -649,7 +739,8 @@
         "x-key-types": [
           "secret",
           "publishable"
-        ]
+        ],
+        "x-example": {}
       }
     },
     "/leaderboards/{leaderboard_id}": {
@@ -689,7 +780,12 @@
         "x-key-types": [
           "secret",
           "publishable"
-        ]
+        ],
+        "x-example": {
+          "path": {
+            "leaderboard_id": "weekly"
+          }
+        }
       }
     },
     "/leaderboards/{leaderboard_id}/scores": {
@@ -758,6 +854,16 @@
               }
             }
           }
+        },
+        "x-example": {
+          "path": {
+            "leaderboard_id": "weekly"
+          },
+          "idempotencyKey": "score-0001",
+          "body": {
+            "player_id": "plr_123",
+            "score": 4200
+          }
         }
       }
     },
@@ -812,7 +918,15 @@
         "x-key-types": [
           "secret",
           "publishable"
-        ]
+        ],
+        "x-example": {
+          "path": {
+            "leaderboard_id": "weekly"
+          },
+          "query": {
+            "limit": "10"
+          }
+        }
       }
     },
     "/leaderboards/{leaderboard_id}/players/{player_id}": {
@@ -860,7 +974,13 @@
         "x-key-types": [
           "secret",
           "publishable"
-        ]
+        ],
+        "x-example": {
+          "path": {
+            "leaderboard_id": "weekly",
+            "player_id": "plr_123"
+          }
+        }
       }
     },
     "/players/{player_id}/inventory": {
@@ -890,6 +1010,11 @@
                 }
               }
             }
+          }
+        },
+        "x-example": {
+          "path": {
+            "player_id": "plr_123"
           }
         }
       }
@@ -957,6 +1082,17 @@
               }
             }
           }
+        },
+        "x-example": {
+          "path": {
+            "player_id": "plr_123"
+          },
+          "idempotencyKey": "reward-season-1-plr_123",
+          "body": {
+            "item_id": "itm_arena_skin",
+            "quantity": 1,
+            "reason": "season_1_reward"
+          }
         }
       }
     },
@@ -1015,6 +1151,16 @@
               }
             }
           }
+        },
+        "x-example": {
+          "path": {
+            "player_id": "plr_123"
+          },
+          "idempotencyKey": "consume-0001",
+          "body": {
+            "item_id": "itm_gold_pack",
+            "quantity": 1
+          }
         }
       }
     },
@@ -1041,7 +1187,8 @@
         "x-key-types": [
           "secret",
           "publishable"
-        ]
+        ],
+        "x-example": {}
       }
     },
     "/players/{player_id}/achievements": {
@@ -1071,6 +1218,11 @@
                 }
               }
             }
+          }
+        },
+        "x-example": {
+          "path": {
+            "player_id": "plr_123"
           }
         }
       }
@@ -1120,6 +1272,13 @@
               }
             }
           }
+        },
+        "x-example": {
+          "path": {
+            "player_id": "plr_123",
+            "achievement_id": "ach_first_win"
+          },
+          "idempotencyKey": "unlock-an-achievement-0001"
         }
       }
     },
@@ -1186,6 +1345,15 @@
               }
             }
           }
+        },
+        "x-example": {
+          "idempotencyKey": "purchase-0001",
+          "body": {
+            "player_id": "plr_123",
+            "item_id": "itm_gold_pack",
+            "quantity": 1,
+            "payment_token": "tok_test_success"
+          }
         }
       },
       "get": {
@@ -1248,6 +1416,11 @@
               }
             }
           }
+        },
+        "x-example": {
+          "query": {
+            "player_id": "plr_123"
+          }
         }
       }
     },
@@ -1283,6 +1456,11 @@
                 }
               }
             }
+          }
+        },
+        "x-example": {
+          "path": {
+            "purchase_id": "pur_901"
           }
         }
       }
@@ -1344,6 +1522,15 @@
               }
             }
           }
+        },
+        "x-example": {
+          "path": {
+            "purchase_id": "pur_901"
+          },
+          "idempotencyKey": "refund-pur_901",
+          "body": {
+            "reason": "customer_request"
+          }
         }
       }
     },
@@ -1374,6 +1561,11 @@
                 }
               }
             }
+          }
+        },
+        "x-example": {
+          "path": {
+            "player_id": "plr_123"
           }
         }
       }
