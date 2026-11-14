@@ -1,0 +1,52 @@
+export const metadata = {
+  title: 'SDKs',
+  description: 'Call the Arena API with plain HTTP from any language.',
+}
+
+# SDKs
+
+<Callout type="note">
+  Arena is a fictional API, so there are no published SDKs. This page shows the plain HTTP calls that any SDK would wrap, and describes what a real SDK page should cover.
+</Callout>
+
+## Call the API directly
+
+Arena is a standard JSON REST API. Any HTTP client works.
+
+<CodeGroup>
+
+```js
+// Node.js 18+
+const res = await fetch('https://api.arena.example/v1/players', {
+  method: 'POST',
+  headers: {
+    Authorization: `Bearer ${process.env.ARENA_SECRET_KEY}`,
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({ display_name: 'NovaKnight' }),
+})
+const player = await res.json()
+```
+
+```python
+# Python 3 with the requests package
+import os, requests
+
+res = requests.post(
+    "https://api.arena.example/v1/players",
+    headers={"Authorization": f"Bearer {os.environ['ARENA_SECRET_KEY']}"},
+    json={"display_name": "NovaKnight"},
+    timeout=10,
+)
+player = res.json()
+```
+
+</CodeGroup>
+
+## What a real SDK page should list
+
+- Supported languages, minimum runtime versions and install commands.
+- A first request that matches the [Quickstart](/docs/get-started/quickstart).
+- How the SDK retries, and whether it sets `Idempotency-Key` for you.
+- The API version the SDK pins. See [Conventions](/docs/api/conventions#versioning).
+- Where to report bugs.

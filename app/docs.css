@@ -1,0 +1,39 @@
+/* Operation pages */
+.endpoint {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.75rem 0 1rem;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--border, #d0d7de);
+  border-radius: 8px;
+}
+.endpoint code { font-size: 0.95rem; background: none; padding: 0; }
+.method {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  color: #fff;
+  letter-spacing: 0.03em;
+}
+.method-get { background: #1a7f37; }
+.method-post { background: #0969da; }
+.method-patch { background: #9a6700; }
+.method-delete { background: #cf222e; }
+.params { overflow-x: auto; margin: 0.75rem 0 1.25rem; }
+.params table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.params th, .params td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid var(--border, #d0d7de);
+}
+.params th { font-weight: 600; }
+.req {
+  margin-left: 0.4rem;
+  font-size: 0.7rem;
+  color: #cf222e;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}

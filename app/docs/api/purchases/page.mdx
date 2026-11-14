@@ -1,0 +1,159 @@
+export const metadata = {
+  title: 'Purchases',
+  description: 'Sell items, refund purchases and list player entitlements.',
+}
+
+# Purchases
+
+A purchase sells an item to a player. When it succeeds, the item is granted to the player's [inventory](/docs/api/inventory) automatically.
+
+## Purchase states
+
+<ParamTable
+  rows={[
+    { name: 'pending', type: 'state', desc: 'Payment is processing. Wait for the purchase.completed event.' },
+    { name: 'succeeded', type: 'state', desc: 'Paid. The item has been granted.' },
+    { name: 'failed', type: 'state', desc: 'Payment did not go through. Nothing was granted.' },
+    { name: 'refunded', type: 'state', desc: 'Refunded. The item was removed from the player.' },
+  ]}
+/>
+
+## The purchase object
+
+```json
+{
+  "id": "pur_901",
+  "object": "purchase",
+  "player_id": "plr_123",
+  "item_id": "itm_gold_pack",
+  "quantity": 1,
+  "status": "succeeded",
+  "grant_id": "gnt_331",
+  "refund": null,
+  "created_at": "2026-11-14T10:20:00Z"
+}
+```
+
+<ParamTable
+  rows={[
+    { name: 'id', type: 'string', desc: 'Unique identifier, prefixed pur_.' },
+    { name: 'status', type: 'string', desc: 'pending, succeeded, failed or refunded.' },
+    { name: 'grant_id', type: 'string or null', desc: 'The grant created by this purchase. Null until it succeeds.' },
+    { name: 'refund', type: 'object or null', desc: 'Set after a refund. Contains reason, revoked_quantity and refunded_at.' },
+  ]}
+/>
+
+## Create a purchase
+
+<Endpoint method="POST" path="/v1/purchases" />
+
+Send an `Idempotency-Key` header so a retry never charges twice.
+
+<ParamTable
+  rows={[
+    { name: 'player_id', type: 'string', required: true, desc: 'The buyer.' },
+    { name: 'item_id', type: 'string', required: true, desc: 'The item to sell.' },
+    { name: 'quantity', type: 'integer', required: true, desc: 'How many, from 1 to 100.' },
+    { name: 'payment_token', type: 'string', required: true, desc: 'A token for the payment method. In the sandbox, use a test token.' },
+  ]}
+/>
+
+```bash
+curl https://api.arena.example/v1/purchases \
+  -H "Authorization: Bearer sk_test_YOUR_KEY" \
+  -H "Idempotency-Key: purchase-0001" \
+  -H "Content-Type: application/json" \
+  -d '{"player_id": "plr_123", "item_id": "itm_gold_pack", "quantity": 1, "payment_token": "tok_test_success"}'
+```
+
+Returns `201` and the purchase. Sends `purchase.completed` when it succeeds.
+
+<ParamTable
+  rows={[
+    { name: 'payment_declined', type: '402', desc: 'The payment method was declined. The purchase is saved with status failed.' },
+    { name: 'item_not_found', type: '404', desc: 'The item does not exist in this mode.' },
+    { name: 'item_not_for_sale', type: '422', desc: 'The item is not available for purchase.' },
+  ]}
+/>
+
+## Retrieve a purchase
+
+<Endpoint method="GET" path="/v1/purchases/{purchase_id}" />
+
+Returns the purchase, or `404` with the code `purchase_not_found`.
+
+## List purchases
+
+<Endpoint method="GET" path="/v1/purchases" />
+
+Returns purchases, newest first.
+
+<ParamTable
+  rows={[
+    { name: 'limit', type: 'integer', desc: 'Objects per page, 1 to 100. The default is 25.' },
+    { name: 'cursor', type: 'string', desc: 'Cursor from a previous response.' },
+    { name: 'player_id', type: 'string', desc: 'Return only this player purchases.' },
+    { name: 'status', type: 'string', desc: 'Filter by status.' },
+  ]}
+/>
+
+## Refund a purchase
+
+<Endpoint method="POST" path="/v1/purchases/{purchase_id}/refund" />
+
+Refunds a `succeeded` purchase within 14 days of creation. Removes the granted items the player still owns. Send an `Idempotency-Key` header. Sends `purchase.refunded`.
+
+<ParamTable
+  rows={[
+    { name: 'reason', type: 'string', desc: 'customer_request, fraud or other. Stored on the purchase.' },
+  ]}
+/>
+
+```bash
+curl https://api.arena.example/v1/purchases/pur_901/refund \
+  -H "Authorization: Bearer sk_test_YOUR_KEY" \
+  -H "Idempotency-Key: refund-pur_901" \
+  -H "Content-Type: application/json" \
+  -d '{"reason": "customer_request"}'
+```
+
+```json
+{
+  "id": "pur_901",
+  "object": "purchase",
+  "status": "refunded",
+  "refund": {
+    "reason": "customer_request",
+    "revoked_quantity": 1,
+    "refunded_at": "2026-11-15T09:00:00Z"
+  }
+}
+```
+
+If the player already consumed some of the items, `revoked_quantity` is lower than the purchased quantity.
+
+<ParamTable
+  rows={[
+    { name: 'purchase_already_refunded', type: '409', desc: 'The purchase was refunded before.' },
+    { name: 'purchase_not_refundable', type: '409', desc: 'The purchase is not succeeded, or it is older than 14 days.' },
+  ]}
+/>
+
+## List player entitlements
+
+<Endpoint method="GET" path="/v1/players/{player_id}/entitlements" />
+
+Returns the non-consumable items a player has bought and keeps for good, such as `itm_season_pass`. Use it to check access without reading the full inventory.
+
+```json
+{
+  "object": "list",
+  "data": [
+    { "item_id": "itm_season_pass", "purchase_id": "pur_870", "granted_at": "2026-10-01T08:00:00Z" }
+  ],
+  "has_more": false,
+  "next_cursor": null
+}
+```
+
+A refund removes the entitlement.

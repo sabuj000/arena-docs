@@ -1,0 +1,144 @@
+export const metadata = {
+  title: 'Leaderboards',
+  description: 'Submit scores and read rankings.',
+}
+
+# Leaderboards
+
+A leaderboard ranks players by score. You can read it with a publishable key and write to it with a secret key.
+
+## The leaderboard object
+
+```json
+{
+  "id": "weekly",
+  "object": "leaderboard",
+  "name": "Weekly",
+  "sort": "desc",
+  "update_mode": "best",
+  "reset": "weekly",
+  "created_at": "2026-01-05T00:00:00Z"
+}
+```
+
+<ParamTable
+  rows={[
+    { name: 'id', type: 'string', desc: 'A short key you choose when you configure the leaderboard, for example weekly.' },
+    { name: 'sort', type: 'string', desc: 'desc if a higher score ranks better, asc if a lower score ranks better.' },
+    { name: 'update_mode', type: 'string', desc: 'How a new score combines with an existing one. best keeps the best score, latest keeps the newest and sum adds scores together.' },
+    { name: 'reset', type: 'string', desc: 'never, daily, weekly or monthly. Resets happen at 00:00 UTC.' },
+  ]}
+/>
+
+Leaderboards are configured in the dashboard. The API reads them and records scores.
+
+## The score object
+
+```json
+{
+  "id": "scr_881",
+  "object": "score",
+  "leaderboard": "weekly",
+  "player_id": "plr_123",
+  "score": 4200,
+  "rank": 1,
+  "match_id": "mch_77",
+  "submitted_at": "2026-11-14T10:01:00Z"
+}
+```
+
+`rank` is the player rank on the leaderboard after this score is applied. Players with equal scores share a rank, and the next rank is not skipped.
+
+## List leaderboards
+
+<Endpoint method="GET" path="/v1/leaderboards" />
+
+Returns all leaderboards. Works with a publishable key.
+
+```bash
+curl https://api.arena.example/v1/leaderboards \
+  -H "Authorization: Bearer pk_test_YOUR_KEY"
+```
+
+## Retrieve a leaderboard
+
+<Endpoint method="GET" path="/v1/leaderboards/{leaderboard_id}" />
+
+Returns the leaderboard, or `404` with the code `leaderboard_not_found`.
+
+## Submit a score
+
+<Endpoint method="POST" path="/v1/leaderboards/{leaderboard_id}/scores" />
+
+Records a score. Requires a secret key. Send an `Idempotency-Key` header.
+
+<ParamTable
+  rows={[
+    { name: 'player_id', type: 'string', required: true, desc: 'The player who earned the score.' },
+    { name: 'score', type: 'integer', required: true, desc: 'The score. Must be 0 or greater.' },
+    { name: 'match_id', type: 'string', desc: 'The match that produced the score. Useful for auditing.' },
+  ]}
+/>
+
+```bash
+curl https://api.arena.example/v1/leaderboards/weekly/scores \
+  -H "Authorization: Bearer sk_test_YOUR_KEY" \
+  -H "Idempotency-Key: score-0001" \
+  -H "Content-Type: application/json" \
+  -d '{"player_id": "plr_123", "score": 4200}'
+```
+
+Returns `201` and the score. Sends `leaderboard.score_submitted`.
+
+<ParamTable
+  rows={[
+    { name: 'player_not_found', type: '404', desc: 'The player does not exist in this mode.' },
+    { name: 'player_suspended', type: '422', desc: 'The player is suspended.' },
+    { name: 'invalid_score', type: '422', desc: 'The score is negative or not an integer.' },
+  ]}
+/>
+
+<Callout type="note">
+  With `update_mode` set to `best`, a lower score is accepted but does not change the player rank. The response still returns the current rank.
+</Callout>
+
+## List entries
+
+<Endpoint method="GET" path="/v1/leaderboards/{leaderboard_id}/entries" />
+
+Returns ranked entries, best first. Works with a publishable key.
+
+<ParamTable
+  rows={[
+    { name: 'limit', type: 'integer', desc: 'Entries per page, 1 to 100. The default is 25.' },
+    { name: 'cursor', type: 'string', desc: 'Cursor from a previous response.' },
+  ]}
+/>
+
+```bash
+curl "https://api.arena.example/v1/leaderboards/weekly/entries?limit=10" \
+  -H "Authorization: Bearer pk_test_YOUR_KEY"
+```
+
+```json
+{
+  "object": "list",
+  "data": [
+    { "rank": 1, "player_id": "plr_123", "display_name": "NovaKnight", "score": 4200 },
+    { "rank": 2, "player_id": "plr_456", "display_name": "IronVale", "score": 3100 }
+  ],
+  "has_more": false,
+  "next_cursor": null
+}
+```
+
+## Retrieve a player entry
+
+<Endpoint method="GET" path="/v1/leaderboards/{leaderboard_id}/players/{player_id}" />
+
+Returns one player rank and score. Returns `404` with the code `entry_not_found` if the player has no score on this leaderboard.
+
+```bash
+curl https://api.arena.example/v1/leaderboards/weekly/players/plr_123 \
+  -H "Authorization: Bearer pk_test_YOUR_KEY"
+```

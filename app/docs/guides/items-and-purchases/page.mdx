@@ -1,0 +1,71 @@
+export const metadata = {
+  title: 'Sell and grant in-game items',
+  description: 'Sell an item, grant free rewards and handle refunds safely.',
+}
+
+# Sell and grant in-game items
+
+Items reach a player two ways. A **purchase** takes payment and grants the item automatically. A **grant** adds an item with no payment, for rewards and promotions. This guide covers both and shows how to refund safely.
+
+## Before you begin
+
+- A test server key. See [Authentication](/docs/get-started/authentication).
+- A player, for example `plr_123`.
+- An item. The sandbox includes `itm_gold_pack`. See [Sandbox and test data](/docs/get-started/sandbox).
+
+## Sell an item
+
+```bash
+curl https://api.arena.example/v1/purchases \
+  -H "Authorization: Bearer sk_test_YOUR_KEY" \
+  -H "Idempotency-Key: purchase-0001" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "player_id": "plr_123",
+    "item_id": "itm_gold_pack",
+    "quantity": 1,
+    "payment_token": "tok_test_success"
+  }'
+```
+
+When `status` is `succeeded`, the item is already in the player's inventory. Do not grant it again.
+
+<Callout type="warning">
+  Wait for the `purchase.completed` webhook before you unlock anything for a purchase that is `pending`.
+</Callout>
+
+## Grant a free item
+
+```bash
+curl https://api.arena.example/v1/players/plr_123/inventory/grants \
+  -H "Authorization: Bearer sk_test_YOUR_KEY" \
+  -H "Idempotency-Key: reward-season-1-plr_123" \
+  -H "Content-Type: application/json" \
+  -d '{"item_id": "itm_arena_skin", "quantity": 1, "reason": "season_1_reward"}'
+```
+
+## Check what the player owns
+
+```bash
+curl https://api.arena.example/v1/players/plr_123/inventory \
+  -H "Authorization: Bearer sk_test_YOUR_KEY"
+```
+
+## Refund safely
+
+```bash
+curl https://api.arena.example/v1/purchases/pur_901/refund \
+  -H "Authorization: Bearer sk_test_YOUR_KEY" \
+  -H "Idempotency-Key: refund-pur_901" \
+  -H "Content-Type: application/json" \
+  -d '{"reason": "customer_request"}'
+```
+
+A refund removes the granted items that the player still owns. If the player already consumed some of them, only the remaining quantity is removed and the response reports `revoked_quantity`.
+
+Follow these rules:
+
+- Always send an `Idempotency-Key` on refunds.
+- Refund a purchase only once. A second refund returns `purchase_already_refunded`.
+- Refunds are allowed for 14 days after the purchase.
+- Update your own records from the `purchase.refunded` webhook, not only from the API response.

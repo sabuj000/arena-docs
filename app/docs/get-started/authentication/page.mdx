@@ -1,0 +1,54 @@
+export const metadata = {
+  title: 'Authentication',
+  description: 'Key types, how to send them and how to rotate them.',
+}
+
+# Authentication
+
+Arena authenticates requests with API keys sent as a bearer token.
+
+```bash
+curl https://api.arena.example/v1/players \
+  -H "Authorization: Bearer sk_test_YOUR_KEY"
+```
+
+## Key types
+
+<ParamTable
+  rows={[
+    { name: 'sk_test_...', type: 'secret, sandbox', desc: 'Full access to sandbox data. Server side only.' },
+    { name: 'sk_live_...', type: 'secret, live', desc: 'Full access to live data. Server side only.' },
+    { name: 'pk_test_...', type: 'publishable, sandbox', desc: 'Read-only access to leaderboards and achievements. Safe in a game client.' },
+    { name: 'pk_live_...', type: 'publishable, live', desc: 'Read-only access to leaderboards and achievements for live data. Safe in a game client.' },
+  ]}
+/>
+
+A key only works in its own mode. A `sk_test_` key cannot read live players, and the reverse is also true.
+
+## Get a key
+
+Create keys in the Arena dashboard under **Developers, API keys**. The full key is shown once. Store it in a secret manager, not in source control.
+
+<Callout type="note">
+  This is a fictional API, so there is no real dashboard. In a real product, document the exact navigation path here.
+</Callout>
+
+## Rotate a key
+
+1. Create a new key.
+2. Deploy the new key to your servers.
+3. Revoke the old key once traffic has moved.
+
+Revoked keys return `401` immediately.
+
+## Authentication errors
+
+<ParamTable
+  rows={[
+    { name: 'invalid_api_key', type: '401', desc: 'The key is missing, malformed or revoked.' },
+    { name: 'insufficient_permissions', type: '403', desc: 'A publishable key called an endpoint that needs a secret key.' },
+    { name: 'mode_mismatch', type: '403', desc: 'The request referenced an object from the other mode.' },
+  ]}
+/>
+
+See [Conventions](/docs/api/conventions) for the full error format.

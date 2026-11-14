@@ -1,0 +1,148 @@
+export const metadata = {
+  title: 'Players',
+  description: 'Create, retrieve, update, delete and list player profiles.',
+}
+
+# Players
+
+A player is one person in your game. Other resources, such as matches, scores and inventory, belong to a player.
+
+## The player object
+
+```json
+{
+  "id": "plr_123",
+  "object": "player",
+  "display_name": "NovaKnight",
+  "status": "active",
+  "metadata": { "region": "ap-south" },
+  "created_at": "2026-11-14T10:00:00Z"
+}
+```
+
+<ParamTable
+  rows={[
+    { name: 'id', type: 'string', desc: 'Unique identifier, prefixed plr_.' },
+    { name: 'object', type: 'string', desc: 'Always player.' },
+    { name: 'display_name', type: 'string', desc: 'The public name. 3 to 24 characters. Unique within your game.' },
+    { name: 'status', type: 'string', desc: 'active or suspended.' },
+    { name: 'metadata', type: 'object', desc: 'Up to 20 string key-value pairs that you control.' },
+    { name: 'created_at', type: 'string', desc: 'When the player was created.' },
+  ]}
+/>
+
+## Create a player
+
+<Endpoint method="POST" path="/v1/players" />
+
+Creates a player. Send an `Idempotency-Key` header.
+
+<ParamTable
+  rows={[
+    { name: 'display_name', type: 'string', required: true, desc: 'The public name. 3 to 24 characters.' },
+    { name: 'metadata', type: 'object', desc: 'Up to 20 string key-value pairs.' },
+  ]}
+/>
+
+<CodeGroup>
+
+```bash
+curl https://api.arena.example/v1/players \
+  -H "Authorization: Bearer sk_test_YOUR_KEY" \
+  -H "Idempotency-Key: player-create-0001" \
+  -H "Content-Type: application/json" \
+  -d '{"display_name": "NovaKnight", "metadata": {"region": "ap-south"}}'
+```
+
+```json
+{
+  "id": "plr_123",
+  "object": "player",
+  "display_name": "NovaKnight",
+  "status": "active",
+  "metadata": { "region": "ap-south" },
+  "created_at": "2026-11-14T10:00:00Z"
+}
+```
+
+</CodeGroup>
+
+Returns `201` and the player. Errors:
+
+<ParamTable
+  rows={[
+    { name: 'display_name_taken', type: '409', desc: 'Another player already uses this name.' },
+    { name: 'invalid_display_name', type: '422', desc: 'The name is too short, too long or contains disallowed characters.' },
+  ]}
+/>
+
+## Retrieve a player
+
+<Endpoint method="GET" path="/v1/players/{player_id}" />
+
+```bash
+curl https://api.arena.example/v1/players/plr_123 \
+  -H "Authorization: Bearer sk_test_YOUR_KEY"
+```
+
+Returns the player, or `404` with the code `player_not_found`.
+
+## Update a player
+
+<Endpoint method="PATCH" path="/v1/players/{player_id}" />
+
+Changes only the fields you send. Sending `metadata` merges keys. Set a key to `null` to remove it.
+
+<ParamTable
+  rows={[
+    { name: 'display_name', type: 'string', desc: 'The new public name.' },
+    { name: 'status', type: 'string', desc: 'active or suspended. A suspended player cannot join matches or submit scores.' },
+    { name: 'metadata', type: 'object', desc: 'Keys to add, change or remove.' },
+  ]}
+/>
+
+```bash
+curl -X PATCH https://api.arena.example/v1/players/plr_123 \
+  -H "Authorization: Bearer sk_test_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"status": "suspended"}'
+```
+
+## Delete a player
+
+<Endpoint method="DELETE" path="/v1/players/{player_id}" />
+
+Deletes the player and their inventory, scores and achievements. A `player.deleted` event is sent.
+
+<Callout type="warning">
+  Deletion is permanent. Purchase records are kept for accounting, with the player reference removed.
+</Callout>
+
+```bash
+curl -X DELETE https://api.arena.example/v1/players/plr_123 \
+  -H "Authorization: Bearer sk_test_YOUR_KEY"
+```
+
+```json
+{ "id": "plr_123", "object": "player", "deleted": true }
+```
+
+## List players
+
+<Endpoint method="GET" path="/v1/players" />
+
+Returns players, newest first. See [Pagination](/docs/api/conventions#pagination).
+
+<ParamTable
+  rows={[
+    { name: 'limit', type: 'integer', desc: 'Objects per page, 1 to 100. The default is 25.' },
+    { name: 'cursor', type: 'string', desc: 'Cursor from a previous response.' },
+    { name: 'display_name', type: 'string', desc: 'Return only players with this exact name.' },
+    { name: 'status', type: 'string', desc: 'Return only players with this status.' },
+  ]}
+/>
+
+```bash
+curl "https://api.arena.example/v1/players?display_name=NovaKnight" \
+  -H "Authorization: Bearer sk_test_YOUR_KEY"
+```

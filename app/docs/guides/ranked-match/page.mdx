@@ -1,0 +1,83 @@
+export const metadata = {
+  title: 'Run a ranked match end to end',
+  description: 'Create players, run a match, report the result and update the leaderboard.',
+}
+
+# Run a ranked match end to end
+
+This guide walks through one complete ranked match between two players: create the players, create and start the match, end it with results, then update the leaderboard.
+
+## Before you begin
+
+- A test server key. See [Authentication](/docs/get-started/authentication).
+- Two players, `plr_123` and `plr_456`. See [Create a player](/docs/api/players#create-a-player).
+
+## 1. Create the match
+
+```bash
+curl https://api.arena.example/v1/matches \
+  -H "Authorization: Bearer sk_test_YOUR_KEY" \
+  -H "Idempotency-Key: match-create-0001" \
+  -H "Content-Type: application/json" \
+  -d '{"mode": "ranked", "max_players": 2, "player_ids": ["plr_123", "plr_456"]}'
+```
+
+The match starts in the `pending` status. Save its `id`, for example `mch_77`.
+
+## 2. Start the match
+
+```bash
+curl -X POST https://api.arena.example/v1/matches/mch_77/start \
+  -H "Authorization: Bearer sk_test_YOUR_KEY"
+```
+
+The status changes to `active`. A `match.started` webhook is sent.
+
+## 3. End the match with results
+
+When the game server decides the outcome, report it once. Include an `Idempotency-Key` so a retry cannot report the result twice.
+
+```bash
+curl https://api.arena.example/v1/matches/mch_77/end \
+  -H "Authorization: Bearer sk_test_YOUR_KEY" \
+  -H "Idempotency-Key: match-end-0001" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "results": [
+      {"player_id": "plr_123", "placement": 1, "score": 4200},
+      {"player_id": "plr_456", "placement": 2, "score": 3100}
+    ]
+  }'
+```
+
+The status changes to `completed` and a `match.completed` webhook is sent.
+
+## 4. Update the leaderboard
+
+Ending a match does not change leaderboards. Submit scores yourself so you control which results count.
+
+```bash
+curl https://api.arena.example/v1/leaderboards/weekly/scores \
+  -H "Authorization: Bearer sk_test_YOUR_KEY" \
+  -H "Idempotency-Key: score-mch_77-plr_123" \
+  -H "Content-Type: application/json" \
+  -d '{"player_id": "plr_123", "score": 4200, "match_id": "mch_77"}'
+```
+
+Repeat for the other player.
+
+<Callout type="tip">
+  Build the idempotency key from the match and player IDs. A retry then reuses the same key and never doubles a score.
+</Callout>
+
+## Handle failures
+
+<ParamTable
+  rows={[
+    { name: 'match_not_startable', type: '409', desc: 'You started a match that is not pending, or one that has too few players.' },
+    { name: 'match_not_active', type: '409', desc: 'You ended a match that is not active.' },
+    { name: 'player_not_in_match', type: '422', desc: 'A result references a player who did not join the match.' },
+  ]}
+/>
+
+If you cancel before the match ends, call [Cancel a match](/docs/api/matches#cancel-a-match) instead of leaving it active.

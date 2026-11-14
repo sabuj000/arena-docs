@@ -1,0 +1,50 @@
+export const metadata = {
+  title: 'Sandbox and test data',
+  description: 'Test mode, reset behavior and special test values.',
+}
+
+# Sandbox and test data
+
+Every account has a sandbox. Requests made with a `sk_test_` or `pk_test_` key run against sandbox data and never affect live players, balances or leaderboards.
+
+## What is different in the sandbox
+
+- Data is isolated from live mode. Object IDs are valid in one mode only.
+- Webhooks are delivered to your test endpoints.
+- Rate limits are lower. See [Conventions](/docs/api/conventions#rate-limits).
+- Sandbox data can be reset at any time from the dashboard.
+
+## Test payment tokens
+
+Use these values as `payment_token` when you [create a purchase](/docs/api/purchases#create-a-purchase). No real payment is made.
+
+<ParamTable
+  rows={[
+    { name: 'tok_test_success', type: 'token', desc: 'The purchase succeeds.' },
+    { name: 'tok_test_declined', type: 'token', desc: 'The purchase fails with the error code payment_declined.' },
+    { name: 'tok_test_slow', type: 'token', desc: 'The purchase stays pending for 30 seconds, then succeeds. Use it to test webhook handling.' },
+  ]}
+/>
+
+## Seed data
+
+New sandboxes include:
+
+- Two leaderboards: `weekly` (highest score wins) and `all_time`.
+- Three items: `itm_gold_pack`, `itm_arena_skin` and `itm_season_pass`.
+- Two achievements: `first_win` and `ten_wins`.
+
+## Reset the sandbox
+
+Resetting deletes all sandbox players, matches, scores, inventory and purchases, then restores the seed data. API keys and webhook endpoints are kept.
+
+<Callout type="warning">
+  A reset cannot be undone. Live data is never affected.
+</Callout>
+
+## Move to live
+
+1. Create a live server key.
+2. Replace `sk_test_` keys in your production configuration.
+3. Register your live webhook endpoint.
+4. Re-create any items and achievements you configured in the sandbox.

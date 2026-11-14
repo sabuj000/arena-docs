@@ -1,0 +1,86 @@
+export const metadata = {
+  title: 'Arena API documentation',
+  description:
+    'Build ranked matches, leaderboards, inventories and in-game purchases into your game with the Arena API. A fictional API for demonstration.',
+}
+
+<Callout type="note">
+  Arena is a fictional API created to demonstrate a docs-as-code workflow. It contains no real product or company content.
+</Callout>
+
+<Hero
+  title="Build competitive play into your game"
+  subtitle="Players, matches, leaderboards, inventory and purchases through one REST API. Make your first request in five minutes."
+  primaryCta={{ label: "Start the quickstart", href: "/docs/get-started/quickstart" }}
+  secondaryCta={{ label: "Browse the API reference", href: "/docs/api/players" }}
+/>
+
+## Make your first request
+
+Create a player, then submit a score. You need a test server key from the sandbox. See [Authentication](/docs/get-started/authentication).
+
+<CodeGroup>
+
+```bash
+# Create a player
+curl https://api.arena.example/v1/players \
+  -H "Authorization: Bearer sk_test_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"display_name": "NovaKnight"}'
+```
+
+```bash
+# Submit a score
+curl https://api.arena.example/v1/leaderboards/weekly/scores \
+  -H "Authorization: Bearer sk_test_YOUR_KEY" \
+  -H "Idempotency-Key: score-0001" \
+  -H "Content-Type: application/json" \
+  -d '{"player_id": "plr_123", "score": 4200}'
+```
+
+</CodeGroup>
+
+Next: [Full quickstart](/docs/get-started/quickstart) · [Sandbox and test data](/docs/get-started/sandbox)
+
+## Explore the API
+
+<CardGroup cols={3}>
+  <Card title="Players" href="/docs/api/players">Create and manage player profiles.</Card>
+  <Card title="Matches" href="/docs/api/matches">Start, join, report results and end matches.</Card>
+  <Card title="Leaderboards" href="/docs/api/leaderboards">Submit scores and read rankings.</Card>
+  <Card title="Inventory" href="/docs/api/inventory">Grant, consume and list items.</Card>
+  <Card title="Achievements" href="/docs/api/achievements">Unlock and list achievements.</Card>
+  <Card title="Purchases" href="/docs/api/purchases">Sell items, handle refunds and entitlements.</Card>
+</CardGroup>
+
+New to the API? Read the [conventions](/docs/api/conventions) for errors, pagination, idempotency, rate limits and versioning.
+
+## Guides
+
+<CardGroup cols={2}>
+  <Card title="Run a ranked match end to end" href="/docs/guides/ranked-match">
+    Create players, start a match, report the result and update the leaderboard.
+  </Card>
+  <Card title="Sell and grant in-game items" href="/docs/guides/items-and-purchases">
+    Create a purchase, grant the item and handle refunds safely.
+  </Card>
+</CardGroup>
+
+## Stay in sync with webhooks
+
+React to game events as they happen, for example `match.completed` and `purchase.refunded`. See [Webhooks and events](/docs/webhooks) for the event list, payloads and retry behavior.
+
+## Latest changes
+
+- **Nov 2026:** Added state-transition details to the matches overview. (Fictional entry.)
+- **Oct 2026:** Leaderboard score submission now supports an `Idempotency-Key` header. (Fictional entry.)
+
+See the full [changelog](/docs/changelog).
+
+## Tools and SDKs
+
+Call the REST API directly. See [SDKs](/docs/sdks) for plain HTTP examples. Machine-readable access: [llms.txt](/llms.txt).
+
+## Need help?
+
+Check the [error reference](/docs/api/conventions) first. If you are still stuck, open an issue in the repository.

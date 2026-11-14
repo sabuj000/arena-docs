@@ -1,0 +1,184 @@
+export const metadata = {
+  title: 'Matches',
+  description: 'Create, start, end and cancel matches, and understand match states.',
+}
+
+# Matches
+
+A match is one game session between players. You create it, start it, then end it with results or cancel it.
+
+## Match states
+
+A match moves through these states. Other transitions are rejected with `409`.
+
+<ParamTable
+  rows={[
+    { name: 'pending', type: 'state', desc: 'Created. Players can join. Can move to active or cancelled.' },
+    { name: 'active', type: 'state', desc: 'Started. No new players can join. Can move to completed or cancelled.' },
+    { name: 'completed', type: 'state', desc: 'Ended with results. Final.' },
+    { name: 'cancelled', type: 'state', desc: 'Cancelled before it ended. Final. No results are stored.' },
+  ]}
+/>
+
+## The match object
+
+```json
+{
+  "id": "mch_77",
+  "object": "match",
+  "mode": "ranked",
+  "status": "completed",
+  "max_players": 2,
+  "player_ids": ["plr_123", "plr_456"],
+  "results": [
+    { "player_id": "plr_123", "placement": 1, "score": 4200 },
+    { "player_id": "plr_456", "placement": 2, "score": 3100 }
+  ],
+  "created_at": "2026-11-14T10:00:00Z",
+  "started_at": "2026-11-14T10:01:00Z",
+  "ended_at": "2026-11-14T10:05:00Z"
+}
+```
+
+<ParamTable
+  rows={[
+    { name: 'id', type: 'string', desc: 'Unique identifier, prefixed mch_.' },
+    { name: 'mode', type: 'string', desc: 'ranked or casual.' },
+    { name: 'status', type: 'string', desc: 'pending, active, completed or cancelled.' },
+    { name: 'max_players', type: 'integer', desc: 'The most players the match accepts, from 2 to 16.' },
+    { name: 'player_ids', type: 'array', desc: 'Players who joined.' },
+    { name: 'results', type: 'array', desc: 'Empty until the match is completed.' },
+    { name: 'created_at', type: 'string', desc: 'When the match was created.' },
+    { name: 'started_at', type: 'string or null', desc: 'When the match started.' },
+    { name: 'ended_at', type: 'string or null', desc: 'When the match ended or was cancelled.' },
+  ]}
+/>
+
+## Create a match
+
+<Endpoint method="POST" path="/v1/matches" />
+
+<ParamTable
+  rows={[
+    { name: 'mode', type: 'string', required: true, desc: 'ranked or casual.' },
+    { name: 'max_players', type: 'integer', required: true, desc: 'From 2 to 16.' },
+    { name: 'player_ids', type: 'array', desc: 'Players to add immediately. You can also add them later with Join a match.' },
+  ]}
+/>
+
+```bash
+curl https://api.arena.example/v1/matches \
+  -H "Authorization: Bearer sk_test_YOUR_KEY" \
+  -H "Idempotency-Key: match-create-0001" \
+  -H "Content-Type: application/json" \
+  -d '{"mode": "ranked", "max_players": 2}'
+```
+
+Returns `201` and the match in the `pending` state.
+
+## Retrieve a match
+
+<Endpoint method="GET" path="/v1/matches/{match_id}" />
+
+Returns the match, or `404` with the code `match_not_found`.
+
+## List matches
+
+<Endpoint method="GET" path="/v1/matches" />
+
+Returns matches, newest first.
+
+<ParamTable
+  rows={[
+    { name: 'limit', type: 'integer', desc: 'Objects per page, 1 to 100. The default is 25.' },
+    { name: 'cursor', type: 'string', desc: 'Cursor from a previous response.' },
+    { name: 'status', type: 'string', desc: 'Filter by status.' },
+    { name: 'player_id', type: 'string', desc: 'Return only matches that include this player.' },
+  ]}
+/>
+
+## Join a match
+
+<Endpoint method="POST" path="/v1/matches/{match_id}/join" />
+
+Adds a player to a `pending` match.
+
+<ParamTable
+  rows={[
+    { name: 'player_id', type: 'string', required: true, desc: 'The player to add.' },
+  ]}
+/>
+
+```bash
+curl https://api.arena.example/v1/matches/mch_77/join \
+  -H "Authorization: Bearer sk_test_YOUR_KEY" \
+  -H "Idempotency-Key: join-mch_77-plr_456" \
+  -H "Content-Type: application/json" \
+  -d '{"player_id": "plr_456"}'
+```
+
+<ParamTable
+  rows={[
+    { name: 'match_full', type: '409', desc: 'The match already has max_players players.' },
+    { name: 'match_not_joinable', type: '409', desc: 'The match is not pending.' },
+    { name: 'player_suspended', type: '422', desc: 'The player is suspended.' },
+  ]}
+/>
+
+## Start a match
+
+<Endpoint method="POST" path="/v1/matches/{match_id}/start" />
+
+Moves a `pending` match to `active`. The match needs at least 2 players. Sends `match.started`.
+
+```bash
+curl -X POST https://api.arena.example/v1/matches/mch_77/start \
+  -H "Authorization: Bearer sk_test_YOUR_KEY"
+```
+
+Returns `409` with the code `match_not_startable` if the match is not pending or has too few players.
+
+## End a match
+
+<Endpoint method="POST" path="/v1/matches/{match_id}/end" />
+
+Moves an `active` match to `completed` and stores the results. Sends `match.completed`. Send an `Idempotency-Key` header.
+
+<ParamTable
+  rows={[
+    { name: 'results', type: 'array', required: true, desc: 'One entry per player.' },
+    { name: 'results[].player_id', type: 'string', required: true, desc: 'A player who joined the match.' },
+    { name: 'results[].placement', type: 'integer', required: true, desc: 'Final position, starting at 1.' },
+    { name: 'results[].score', type: 'integer', desc: 'The player score for this match.' },
+  ]}
+/>
+
+```bash
+curl https://api.arena.example/v1/matches/mch_77/end \
+  -H "Authorization: Bearer sk_test_YOUR_KEY" \
+  -H "Idempotency-Key: match-end-0001" \
+  -H "Content-Type: application/json" \
+  -d '{"results": [{"player_id": "plr_123", "placement": 1, "score": 4200}, {"player_id": "plr_456", "placement": 2, "score": 3100}]}'
+```
+
+<ParamTable
+  rows={[
+    { name: 'match_not_active', type: '409', desc: 'The match is not active.' },
+    { name: 'player_not_in_match', type: '422', desc: 'A result references a player who did not join the match.' },
+  ]}
+/>
+
+<Callout type="note">
+  Ending a match does not change leaderboards. Submit scores separately. See [Run a ranked match end to end](/docs/guides/ranked-match).
+</Callout>
+
+## Cancel a match
+
+<Endpoint method="POST" path="/v1/matches/{match_id}/cancel" />
+
+Moves a `pending` or `active` match to `cancelled`. Sends `match.cancelled`. A completed match cannot be cancelled and returns `match_not_cancellable`.
+
+```bash
+curl -X POST https://api.arena.example/v1/matches/mch_77/cancel \
+  -H "Authorization: Bearer sk_test_YOUR_KEY"
+```

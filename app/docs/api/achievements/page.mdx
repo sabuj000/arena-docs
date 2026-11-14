@@ -1,0 +1,87 @@
+export const metadata = {
+  title: 'Achievements',
+  description: 'List achievements and unlock them for players.',
+}
+
+# Achievements
+
+An achievement is a milestone a player can earn once, for example `first_win`. Achievements are defined in the dashboard. The API lists them and records when a player unlocks one.
+
+## The achievement object
+
+```json
+{
+  "id": "ach_first_win",
+  "object": "achievement",
+  "key": "first_win",
+  "name": "First win",
+  "description": "Win your first ranked match.",
+  "hidden": false
+}
+```
+
+<ParamTable
+  rows={[
+    { name: 'id', type: 'string', desc: 'Unique identifier, prefixed ach_.' },
+    { name: 'key', type: 'string', desc: 'A stable short name you choose.' },
+    { name: 'name', type: 'string', desc: 'The display name.' },
+    { name: 'description', type: 'string', desc: 'How a player earns it.' },
+    { name: 'hidden', type: 'boolean', desc: 'If true, the achievement is not listed until a player unlocks it.' },
+  ]}
+/>
+
+## List achievements
+
+<Endpoint method="GET" path="/v1/achievements" />
+
+Returns all achievements that are not hidden. Works with a publishable key.
+
+```bash
+curl https://api.arena.example/v1/achievements \
+  -H "Authorization: Bearer pk_test_YOUR_KEY"
+```
+
+## List a player achievements
+
+<Endpoint method="GET" path="/v1/players/{player_id}/achievements" />
+
+Returns the achievements the player has unlocked, including hidden ones, with the time of each unlock.
+
+```json
+{
+  "object": "list",
+  "data": [
+    { "achievement_id": "ach_first_win", "unlocked_at": "2026-11-14T10:05:00Z" }
+  ],
+  "has_more": false,
+  "next_cursor": null
+}
+```
+
+## Unlock an achievement
+
+<Endpoint method="POST" path="/v1/players/{player_id}/achievements/{achievement_id}/unlock" />
+
+Records that the player unlocked the achievement. Requires a secret key. Sends `achievement.unlocked`.
+
+```bash
+curl -X POST https://api.arena.example/v1/players/plr_123/achievements/ach_first_win/unlock \
+  -H "Authorization: Bearer sk_test_YOUR_KEY"
+```
+
+```json
+{
+  "achievement_id": "ach_first_win",
+  "player_id": "plr_123",
+  "unlocked_at": "2026-11-14T10:05:00Z"
+}
+```
+
+Unlocking is safe to repeat. If the player already has the achievement, the request returns `200` with the original `unlocked_at` and no second event is sent.
+
+<ParamTable
+  rows={[
+    { name: 'achievement_not_found', type: '404', desc: 'The achievement does not exist in this mode.' },
+    { name: 'player_not_found', type: '404', desc: 'The player does not exist in this mode.' },
+  ]}
+/>

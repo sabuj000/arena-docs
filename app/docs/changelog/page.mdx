@@ -1,0 +1,30 @@
+export const metadata = {
+  title: 'Changelog',
+  description: 'Fictional release notes for the Arena API.',
+}
+
+# Changelog
+
+<Callout type="note">
+  These entries are fictional. They show the format a real changelog should follow: date, what changed, and whether it affects existing integrations.
+</Callout>
+
+## November 2026
+
+- **Docs:** Added state-transition details to the [Matches](/docs/api/matches) overview.
+- **Added:** `reason` is now returned on refunded purchases.
+
+## October 2026
+
+- **Added:** Leaderboard score submission supports the `Idempotency-Key` header. See [Conventions](/docs/api/conventions#idempotency).
+- **Added:** The `purchase.refunded` webhook event.
+
+## September 2026
+
+- **Changed:** Sandbox rate limits are now 25 requests per second per key.
+- **Fixed:** Ranks on the `weekly` leaderboard no longer skip a position after a tie.
+
+## August 2026
+
+- **Added:** The Achievements resource and the `achievement.unlocked` event.
+- **Deprecated:** The `GET /v1/players/search` endpoint. Use `GET /v1/players` with the `display_name` filter. Removal is planned for the next API version.

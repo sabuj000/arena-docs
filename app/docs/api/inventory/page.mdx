@@ -1,0 +1,115 @@
+export const metadata = {
+  title: 'Inventory',
+  description: 'Grant, consume and list the items a player owns.',
+}
+
+# Inventory
+
+A player's inventory lists the items they own and how many of each. Items are defined in the dashboard and referenced by ID, for example `itm_gold_pack`.
+
+You change inventory in three ways: a grant, a consume, or a [purchase](/docs/api/purchases), which grants automatically.
+
+## The inventory item object
+
+```json
+{
+  "object": "inventory_item",
+  "item_id": "itm_gold_pack",
+  "quantity": 3,
+  "updated_at": "2026-11-14T10:10:00Z"
+}
+```
+
+<ParamTable
+  rows={[
+    { name: 'item_id', type: 'string', desc: 'The item, prefixed itm_.' },
+    { name: 'quantity', type: 'integer', desc: 'How many the player owns. Never negative.' },
+    { name: 'updated_at', type: 'string', desc: 'When the quantity last changed.' },
+  ]}
+/>
+
+## List a player inventory
+
+<Endpoint method="GET" path="/v1/players/{player_id}/inventory" />
+
+Returns the items the player owns with a quantity above zero.
+
+```bash
+curl https://api.arena.example/v1/players/plr_123/inventory \
+  -H "Authorization: Bearer sk_test_YOUR_KEY"
+```
+
+```json
+{
+  "object": "list",
+  "data": [
+    { "object": "inventory_item", "item_id": "itm_gold_pack", "quantity": 3, "updated_at": "2026-11-14T10:10:00Z" }
+  ],
+  "has_more": false,
+  "next_cursor": null
+}
+```
+
+## Grant an item
+
+<Endpoint method="POST" path="/v1/players/{player_id}/inventory/grants" />
+
+Adds items to a player with no payment. Send an `Idempotency-Key` header. Sends `inventory.granted`.
+
+<ParamTable
+  rows={[
+    { name: 'item_id', type: 'string', required: true, desc: 'The item to grant.' },
+    { name: 'quantity', type: 'integer', required: true, desc: 'How many to add, from 1 to 1000.' },
+    { name: 'reason', type: 'string', desc: 'A short label for your records, for example season_1_reward.' },
+  ]}
+/>
+
+```bash
+curl https://api.arena.example/v1/players/plr_123/inventory/grants \
+  -H "Authorization: Bearer sk_test_YOUR_KEY" \
+  -H "Idempotency-Key: reward-season-1-plr_123" \
+  -H "Content-Type: application/json" \
+  -d '{"item_id": "itm_arena_skin", "quantity": 1, "reason": "season_1_reward"}'
+```
+
+```json
+{
+  "id": "gnt_330",
+  "object": "grant",
+  "player_id": "plr_123",
+  "item_id": "itm_arena_skin",
+  "quantity": 1,
+  "reason": "season_1_reward",
+  "created_at": "2026-11-14T10:10:00Z"
+}
+```
+
+<ParamTable
+  rows={[
+    { name: 'item_not_found', type: '404', desc: 'The item does not exist in this mode.' },
+    { name: 'item_limit_reached', type: '422', desc: 'The grant would exceed the maximum the player can own.' },
+  ]}
+/>
+
+## Consume an item
+
+<Endpoint method="POST" path="/v1/players/{player_id}/inventory/consume" />
+
+Removes items, for example when a player uses a potion. Send an `Idempotency-Key` header. Sends `inventory.consumed`.
+
+<ParamTable
+  rows={[
+    { name: 'item_id', type: 'string', required: true, desc: 'The item to consume.' },
+    { name: 'quantity', type: 'integer', required: true, desc: 'How many to remove, at least 1.' },
+  ]}
+/>
+
+```bash
+curl https://api.arena.example/v1/players/plr_123/inventory/consume \
+  -H "Authorization: Bearer sk_test_YOUR_KEY" \
+  -H "Idempotency-Key: consume-0001" \
+  -H "Content-Type: application/json" \
+  -d '{"item_id": "itm_gold_pack", "quantity": 1}'
+```
+
+Returns the updated inventory item. If the player owns fewer than `quantity`, the request fails with `409` and the code `insufficient_quantity`, and nothing is removed.

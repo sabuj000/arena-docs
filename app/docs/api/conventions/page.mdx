@@ -1,0 +1,145 @@
+export const metadata = {
+  title: 'Conventions',
+  description: 'Errors, pagination, idempotency, rate limits and versioning for the Arena API.',
+}
+
+# Conventions
+
+These rules apply to every endpoint in the API reference.
+
+## Base URL and format
+
+All requests use HTTPS and the base URL `https://api.arena.example/v1`. Request and response bodies are JSON. Send `Content-Type: application/json` on requests with a body. Timestamps are ISO 8601 in UTC.
+
+## Errors
+
+The API uses standard HTTP status codes. Error responses share one shape.
+
+```json
+{
+  "error": {
+    "type": "invalid_request_error",
+    "code": "missing_parameter",
+    "message": "display_name is required.",
+    "param": "display_name",
+    "request_id": "req_a1b2c3"
+  }
+}
+```
+
+<ParamTable
+  rows={[
+    { name: 'type', type: 'string', desc: 'The error category: invalid_request_error, authentication_error, permission_error, not_found_error, conflict_error, rate_limit_error or api_error.' },
+    { name: 'code', type: 'string', desc: 'A stable, machine-readable code. Branch on this, not on the message.' },
+    { name: 'message', type: 'string', desc: 'A human-readable explanation. The wording can change.' },
+    { name: 'param', type: 'string', desc: 'The request field that caused the error, when there is one.' },
+    { name: 'request_id', type: 'string', desc: 'Include this when you contact support.' },
+  ]}
+/>
+
+### Status codes
+
+<ParamTable
+  rows={[
+    { name: '200', type: 'OK', desc: 'The request succeeded.' },
+    { name: '201', type: 'Created', desc: 'The object was created.' },
+    { name: '400', type: 'Bad request', desc: 'The request is malformed.' },
+    { name: '401', type: 'Unauthorized', desc: 'The API key is missing or invalid.' },
+    { name: '403', type: 'Forbidden', desc: 'The key cannot perform this action.' },
+    { name: '404', type: 'Not found', desc: 'The object does not exist in this mode.' },
+    { name: '409', type: 'Conflict', desc: 'The object is in a state that does not allow this action.' },
+    { name: '422', type: 'Unprocessable', desc: 'The parameters are valid JSON but fail validation.' },
+    { name: '429', type: 'Too many requests', desc: 'You hit a rate limit.' },
+    { name: '500', type: 'Server error', desc: 'Something failed on our side. Retry with the same idempotency key.' },
+  ]}
+/>
+
+## Pagination
+
+List endpoints return a page of objects and use cursors.
+
+```bash
+curl "https://api.arena.example/v1/players?limit=25" \
+  -H "Authorization: Bearer sk_test_YOUR_KEY"
+```
+
+```json
+{
+  "object": "list",
+  "data": [],
+  "has_more": true,
+  "next_cursor": "cur_8f3a"
+}
+```
+
+<ParamTable
+  rows={[
+    { name: 'limit', type: 'integer', desc: 'Objects per page, from 1 to 100. The default is 25.' },
+    { name: 'cursor', type: 'string', desc: 'Pass next_cursor from the previous response to get the next page.' },
+  ]}
+/>
+
+When `has_more` is `false`, you have reached the end. Cursors expire after 24 hours.
+
+## Idempotency
+
+Send an `Idempotency-Key` header on every `POST` request that creates or changes something. If a request times out, retry it with the same key and the API will not repeat the action.
+
+```bash
+curl https://api.arena.example/v1/purchases \
+  -H "Authorization: Bearer sk_test_YOUR_KEY" \
+  -H "Idempotency-Key: purchase-0001" \
+  -H "Content-Type: application/json" \
+  -d '{"player_id": "plr_123", "item_id": "itm_gold_pack", "quantity": 1, "payment_token": "tok_test_success"}'
+```
+
+- Use a unique key per logical action, such as a UUID or an ID from your own system.
+- Keys are remembered for 24 hours.
+- Reusing a key with different parameters returns `409` with the code `idempotency_key_reuse`.
+- `GET` and `DELETE` requests are naturally idempotent and ignore the header.
+
+## Rate limits
+
+Limits apply per API key.
+
+<ParamTable
+  rows={[
+    { name: 'Live mode', type: '100 requests per second', desc: 'Contact support if you need a higher limit.' },
+    { name: 'Sandbox', type: '25 requests per second', desc: 'Lower than live mode.' },
+  ]}
+/>
+
+Every response includes these headers.
+
+<ParamTable
+  rows={[
+    { name: 'X-RateLimit-Limit', type: 'integer', desc: 'Requests allowed per second.' },
+    { name: 'X-RateLimit-Remaining', type: 'integer', desc: 'Requests left in the current second.' },
+    { name: 'Retry-After', type: 'integer', desc: 'Sent with a 429. Seconds to wait before you retry.' },
+  ]}
+/>
+
+On a `429`, wait for `Retry-After` seconds, then retry. Add random jitter so many clients do not retry together.
+
+## Versioning
+
+The API is versioned by date. Your account is pinned to the version that was current when you created your first key. To test a newer version on one request, send the header `Arena-Version: 2026-10-01`.
+
+Backward-compatible changes ship without a new version. These include new endpoints, new optional parameters and new fields in responses. Write your client to ignore fields it does not recognize.
+
+## Object IDs
+
+IDs are opaque strings with a prefix that shows the type, such as `plr_123` for a player. Do not parse them or assume a length.
+
+<ParamTable
+  rows={[
+    { name: 'plr_', type: 'prefix', desc: 'Player' },
+    { name: 'mch_', type: 'prefix', desc: 'Match' },
+    { name: 'scr_', type: 'prefix', desc: 'Score' },
+    { name: 'itm_', type: 'prefix', desc: 'Item' },
+    { name: 'gnt_', type: 'prefix', desc: 'Inventory grant' },
+    { name: 'ach_', type: 'prefix', desc: 'Achievement' },
+    { name: 'pur_', type: 'prefix', desc: 'Purchase' },
+    { name: 'evt_', type: 'prefix', desc: 'Webhook event' },
+  ]}
+/>
