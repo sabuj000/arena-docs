@@ -1,0 +1,114 @@
+export const metadata = {
+  title: 'Handle errors and retries safely',
+  description: 'Decide which Arena API errors to fix, which to handle and which to retry, using a purchase as the example. Use it before you ship a game server integration.',
+}
+
+# Handle errors and retries safely
+
+This guide shows how a game server should react when an Arena API call fails. It uses a purchase as the example, because a wrong retry there can charge a player twice.
+
+## Before you begin
+
+- A test server key. See [Authentication](/docs/get-started/authentication).
+- A player `plr_123` and an item `itm_gold_pack` that is for sale. See [Sell and grant in-game items](/docs/guides/items-and-purchases).
+
+## 1. Sort errors into three groups
+
+Read the status code first, then branch on the error `code`. The `message` text can change, so never match on it. For the error shape, see [Errors](/docs/api/conventions#errors).
+
+<ParamTable
+  rows={[
+    { name: 'Fix the request', type: '400, 401, 403, 404, 422', desc: 'Retrying the same request fails the same way. Correct the request, the key or the object ID, then send it again.' },
+    { name: 'Handle the state', type: '402, 409', desc: 'The request was valid but the object or the payment cannot accept it now. Change what you do next, not how often you retry.' },
+    { name: 'Retry', type: '429, 500, timeout', desc: 'The request may be fine. Retry it with the same idempotency key.' },
+  ]}
+/>
+
+## 2. Send an idempotency key on every purchase
+
+An `Idempotency-Key` lets you repeat a request without repeating the action. Build the key from your own order ID so every retry of the same order reuses it. See [Idempotency](/docs/api/conventions#idempotency).
+
+```bash
+curl https://api.arena.example/v1/purchases \
+  -H "Authorization: Bearer sk_test_YOUR_KEY" \
+  -H "Idempotency-Key: order-5521" \
+  -H "Content-Type: application/json" \
+  -d '{"player_id": "plr_123", "item_id": "itm_gold_pack", "quantity": 1, "payment_token": "tok_test_success"}'
+```
+
+<Callout type="warning">
+  Use a new key for a new order. Reusing a key for a different request returns an error instead of a second purchase.
+</Callout>
+
+## 3. Retry only what is safe to retry
+
+Retry on a `429`, a `500` or a request that timed out. Always reuse the same idempotency key. On a `429`, wait for the number of seconds in the `Retry-After` header. Add random jitter so many servers do not retry together. See [Rate limits](/docs/api/conventions#rate-limits).
+
+```js
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+// Wait 0.5 s, 1 s, 2 s, 4 s, plus a little random jitter.
+const backoff = (attempt) => 500 * 2 ** attempt + Math.random() * 250
+
+async function createPurchase(body, key) {
+  for (let attempt = 0; attempt < 4; attempt++) {
+    let res
+    try {
+      res = await fetch('https://api.arena.example/v1/purchases', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${process.env.ARENA_SECRET_KEY}`,
+          'Idempotency-Key': key,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      })
+    } catch (networkError) {
+      await sleep(backoff(attempt))
+      continue
+    }
+    if (res.status === 429) {
+      const wait = Number(res.headers.get('Retry-After') ?? 1) * 1000
+      await sleep(wait + Math.random() * 250)
+      continue
+    }
+    if (res.status === 500) {
+      await sleep(backoff(attempt))
+      continue
+    }
+    return res
+  }
+  throw new Error('Purchase did not complete after 4 attempts')
+}
+```
+
+The helper returns every other response to your code, so the next step can handle it.
+
+## 4. Handle the errors a purchase can return
+
+These codes come from [Create a purchase](/docs/api/purchases#create-a-purchase). None of them should be retried automatically.
+
+<ParamTable
+  rows={[
+    { name: 'payment_declined', type: '402', desc: 'The payment method was declined. Ask the player to use another one, then start a new order with a new idempotency key.' },
+    { name: 'item_not_found', type: '404', desc: 'The item ID does not exist. Check the ID in your catalog.' },
+    { name: 'item_not_for_sale', type: '422', desc: 'The item exists but cannot be sold. Hide it from your store.' },
+  ]}
+/>
+
+The same pattern applies to other calls. For example, [Join a match](/docs/api/matches#join-a-match) can return `match_full` or `match_not_joinable` with a `409`. Show the player a different match instead of retrying.
+
+## 5. Confirm the result with a webhook
+
+If your server loses the response, do not guess. Wait for the `purchase.completed` webhook, or retrieve the purchase and read its `status`. Arena retries webhook delivery on its own, so make your handler safe to run twice. See [Handle duplicates and ordering](/docs/webhooks#handle-duplicates-and-ordering).
+
+## Success criteria
+
+- A retry after a timeout does not create a second purchase.
+- Your logs show the same idempotency key on every attempt for one order.
+- A declined payment never triggers an automatic retry.
+
+## If something goes wrong
+
+- You get a `429` on every attempt: lower your request rate. Sandbox keys have a lower limit than live keys.
+- You are not sure whether a purchase went through: retrieve it with [Retrieve a purchase](/docs/api/purchases#retrieve-a-purchase) before you create another.
+- You charged a player by mistake: [refund the purchase](/docs/api/purchases#refund-a-purchase).

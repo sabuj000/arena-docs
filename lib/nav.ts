@@ -18,6 +18,7 @@ export const nav: NavGroup[] = [
     items: [
       { title: 'Run a ranked match end to end', href: '/docs/guides/ranked-match' },
       { title: 'Sell and grant in-game items', href: '/docs/guides/items-and-purchases' },
+      { title: 'Handle errors and retries safely', href: '/docs/guides/errors-and-retries' },
     ],
   },
   {
