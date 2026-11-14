@@ -1,5 +1,6 @@
 import './globals.css'
 import './docs.css'
+import './responsive.css'
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import { Sidebar } from '../components/Sidebar'

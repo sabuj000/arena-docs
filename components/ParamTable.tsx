@@ -14,14 +14,14 @@ export function ParamTable({ rows }: { rows: Row[] }) {
         <tbody>
           {rows.map((r) => (
             <tr key={r.name}>
-              <td>
+              <td data-label="Name">
                 <code>{r.name}</code>
                 {r.required ? <span className="req">required</span> : null}
               </td>
-              <td>
+              <td data-label="Type">
                 <code>{r.type}</code>
               </td>
-              <td>{r.desc}</td>
+              <td data-label="Description">{r.desc}</td>
             </tr>
           ))}
         </tbody>
