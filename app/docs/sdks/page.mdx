@@ -15,8 +15,14 @@ Arena is a standard JSON REST API. Any HTTP client works.
 
 <CodeGroup>
 
-```js
-// Node.js 18+
+```bash
+curl https://api.arena.example/v1/players \
+  -H "Authorization: Bearer sk_test_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"display_name": "NovaKnight"}'
+```
+
+```ts
 const res = await fetch('https://api.arena.example/v1/players', {
   method: 'POST',
   headers: {
@@ -29,19 +35,39 @@ const player = await res.json()
 ```
 
 ```python
-# Python 3 with the requests package
-import os, requests
+import os
+import requests
 
 res = requests.post(
     "https://api.arena.example/v1/players",
-    headers={"Authorization": f"Bearer {os.environ['ARENA_SECRET_KEY']}"},
+    headers={
+        "Authorization": f"Bearer {os.environ['ARENA_SECRET_KEY']}",
+    },
     json={"display_name": "NovaKnight"},
     timeout=10,
 )
 player = res.json()
 ```
 
+```php
+<?php
+$ch = curl_init('https://api.arena.example/v1/players');
+curl_setopt_array($ch, [
+    CURLOPT_POST => true,
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_HTTPHEADER => [
+        'Authorization: Bearer ' . getenv('ARENA_SECRET_KEY'),
+        'Content-Type: application/json',
+    ],
+    CURLOPT_POSTFIELDS => json_encode(['display_name' => 'NovaKnight']),
+]);
+$player = json_decode(curl_exec($ch), true);
+curl_close($ch);
+```
+
 </CodeGroup>
+
+The TypeScript example uses the built-in `fetch` in Node.js 18 or later. The Python example uses the `requests` package. The PHP example uses the cURL extension.
 
 ## What a real SDK page should list
 

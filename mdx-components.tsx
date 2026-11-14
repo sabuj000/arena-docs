@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import type { MDXComponents } from 'mdx/types'
 import { Hero } from './components/Hero'
 import { Card, CardGroup } from './components/Card'
+import { CodeBlock } from './components/CodeBlock'
 import { CodeGroup } from './components/CodeGroup'
 import { Callout } from './components/Callout'
 import { Endpoint } from './components/Endpoint'
@@ -21,6 +22,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
     h2: ({ children }) => <h2 id={slugify(children)}>{children}</h2>,
     h3: ({ children }) => <h3 id={slugify(children)}>{children}</h3>,
+    pre: CodeBlock,
     Hero,
     Card,
     CardGroup,

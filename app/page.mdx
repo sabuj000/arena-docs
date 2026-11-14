@@ -19,23 +19,118 @@ export const metadata = {
 
 Create a player, then submit a score. You need a test server key from the sandbox. See [Authentication](/docs/get-started/authentication).
 
+**Create a player**
+
 <CodeGroup>
 
 ```bash
-# Create a player
 curl https://api.arena.example/v1/players \
   -H "Authorization: Bearer sk_test_YOUR_KEY" \
   -H "Content-Type: application/json" \
   -d '{"display_name": "NovaKnight"}'
 ```
 
+```ts
+const res = await fetch('https://api.arena.example/v1/players', {
+  method: 'POST',
+  headers: {
+    Authorization: `Bearer ${process.env.ARENA_SECRET_KEY}`,
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({ display_name: 'NovaKnight' }),
+})
+const player = await res.json()
+```
+
+```python
+import os
+import requests
+
+res = requests.post(
+    "https://api.arena.example/v1/players",
+    headers={
+        "Authorization": f"Bearer {os.environ['ARENA_SECRET_KEY']}",
+    },
+    json={"display_name": "NovaKnight"},
+    timeout=10,
+)
+player = res.json()
+```
+
+```php
+<?php
+$ch = curl_init('https://api.arena.example/v1/players');
+curl_setopt_array($ch, [
+    CURLOPT_POST => true,
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_HTTPHEADER => [
+        'Authorization: Bearer ' . getenv('ARENA_SECRET_KEY'),
+        'Content-Type: application/json',
+    ],
+    CURLOPT_POSTFIELDS => json_encode(['display_name' => 'NovaKnight']),
+]);
+$player = json_decode(curl_exec($ch), true);
+curl_close($ch);
+```
+
+</CodeGroup>
+
+**Submit a score**
+
+<CodeGroup>
+
 ```bash
-# Submit a score
 curl https://api.arena.example/v1/leaderboards/weekly/scores \
   -H "Authorization: Bearer sk_test_YOUR_KEY" \
   -H "Idempotency-Key: score-0001" \
   -H "Content-Type: application/json" \
   -d '{"player_id": "plr_123", "score": 4200}'
+```
+
+```ts
+const res = await fetch('https://api.arena.example/v1/leaderboards/weekly/scores', {
+  method: 'POST',
+  headers: {
+    Authorization: `Bearer ${process.env.ARENA_SECRET_KEY}`,
+    'Idempotency-Key': 'score-0001',
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({ player_id: 'plr_123', score: 4200 }),
+})
+const score = await res.json()
+```
+
+```python
+import os
+import requests
+
+res = requests.post(
+    "https://api.arena.example/v1/leaderboards/weekly/scores",
+    headers={
+        "Authorization": f"Bearer {os.environ['ARENA_SECRET_KEY']}",
+        "Idempotency-Key": "score-0001",
+    },
+    json={"player_id": "plr_123", "score": 4200},
+    timeout=10,
+)
+score = res.json()
+```
+
+```php
+<?php
+$ch = curl_init('https://api.arena.example/v1/leaderboards/weekly/scores');
+curl_setopt_array($ch, [
+    CURLOPT_POST => true,
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_HTTPHEADER => [
+        'Authorization: Bearer ' . getenv('ARENA_SECRET_KEY'),
+        'Idempotency-Key: score-0001',
+        'Content-Type: application/json',
+    ],
+    CURLOPT_POSTFIELDS => json_encode(['player_id' => 'plr_123', 'score' => 4200]),
+]);
+$score = json_decode(curl_exec($ch), true);
+curl_close($ch);
 ```
 
 </CodeGroup>

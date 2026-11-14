@@ -54,6 +54,63 @@ curl https://api.arena.example/v1/players \
   -d '{"display_name": "NovaKnight", "metadata": {"region": "ap-south"}}'
 ```
 
+```ts
+const res = await fetch('https://api.arena.example/v1/players', {
+  method: 'POST',
+  headers: {
+    Authorization: `Bearer ${process.env.ARENA_SECRET_KEY}`,
+    'Idempotency-Key': 'player-create-0001',
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    display_name: 'NovaKnight',
+    metadata: { region: 'ap-south' },
+  }),
+})
+const player = await res.json()
+```
+
+```python
+import os
+import requests
+
+res = requests.post(
+    "https://api.arena.example/v1/players",
+    headers={
+        "Authorization": f"Bearer {os.environ['ARENA_SECRET_KEY']}",
+        "Idempotency-Key": "player-create-0001",
+    },
+    json={
+        "display_name": "NovaKnight",
+        "metadata": {"region": "ap-south"},
+    },
+    timeout=10,
+)
+player = res.json()
+```
+
+```php
+<?php
+$ch = curl_init('https://api.arena.example/v1/players');
+curl_setopt_array($ch, [
+    CURLOPT_POST => true,
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_HTTPHEADER => [
+        'Authorization: Bearer ' . getenv('ARENA_SECRET_KEY'),
+        'Idempotency-Key: player-create-0001',
+        'Content-Type: application/json',
+    ],
+    CURLOPT_POSTFIELDS => json_encode([
+        'display_name' => 'NovaKnight',
+        'metadata' => ['region' => 'ap-south'],
+    ]),
+]);
+$player = json_decode(curl_exec($ch), true);
+curl_close($ch);
+```
+
+</CodeGroup>
+
 ```json
 {
   "id": "plr_123",
@@ -64,8 +121,6 @@ curl https://api.arena.example/v1/players \
   "created_at": "2026-11-14T10:00:00Z"
 }
 ```
-
-</CodeGroup>
 
 Returns `201` and the player. Errors:
 
