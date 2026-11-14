@@ -1,0 +1,21 @@
+name: Docs quality gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check links, nav, metadata and tables
+        run: node scripts/check-docs.mjs
+      - name: Install dependencies
+        run: npm install
+      - name: Build
+        run: npm run build
