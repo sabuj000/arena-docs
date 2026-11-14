@@ -15,6 +15,10 @@ jobs:
           node-version: 22
       - name: Check links, nav, metadata and tables
         run: node scripts/check-docs.mjs
+      - name: Check docs against the OpenAPI spec
+        run: node scripts/check-spec.mjs
+      - name: Seeded-error accuracy test
+        run: node scripts/seeded-error-test.mjs
       - name: Install dependencies
         run: npm install
       - name: Build
