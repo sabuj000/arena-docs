@@ -1,0 +1,39 @@
+{/* Template: one API operation, written as a section of a resource page in Arena MDX.
+    Fill only from openapi/arena.json. Never invent parameters, limits, enums or errors.
+    Replace every <placeholder>. Delete this comment. */}
+
+## <Operation name, imperative: Create a player>
+
+<Endpoint method="<GET|POST|PATCH|DELETE>" path="/v1/<path with {placeholders}>" />
+
+<One sentence: what the operation does and any key requirement, for example "Send an `Idempotency-Key` header.">
+
+<ParamTable
+  rows={[
+    { name: '<param>', type: '<type>', required: true, desc: '<What it is. State limits and every enum value, worded as in the spec.>' },
+    { name: '<optional param>', type: '<type>', desc: '<...>' },
+  ]}
+/>
+
+```bash
+curl https://api.arena.example/v1/<path> \
+  -H "Authorization: Bearer sk_test_YOUR_KEY" \
+  -H "Idempotency-Key: <unique-key>" \
+  -H "Content-Type: application/json" \
+  -d '{"<param>": "<value>"}'
+```
+
+```json
+{
+  "id": "<prefix_123>",
+  "object": "<object name>"
+}
+```
+
+Returns `<status>` and the <object>. Sends `<event.name>` if the operation emits a webhook.
+
+<ParamTable
+  rows={[
+    { name: '<error_code>', type: '<status>', desc: '<When it happens.>' },
+  ]}
+/>

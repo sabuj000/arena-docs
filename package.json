@@ -6,7 +6,11 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "check:docs": "node scripts/check-docs.mjs",
+    "check:spec": "node scripts/check-spec.mjs",
+    "test:seeded": "node scripts/seeded-error-test.mjs",
+    "check": "node scripts/check-docs.mjs && node scripts/check-spec.mjs"
   },
   "dependencies": {
     "@mdx-js/loader": "latest",
