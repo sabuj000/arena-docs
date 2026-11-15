@@ -1,15 +1,123 @@
 export const metadata = {
   title: 'SDKs',
-  description: 'Call the Arena API with plain HTTP from any language.',
+  description: 'Use the demo TypeScript SDK, or call the Arena API with plain HTTP from any language.',
 }
 
 # SDKs
 
 <Callout type="note">
-  Arena is a fictional API, so there are no published SDKs. This page shows the plain HTTP calls that any SDK would wrap, and describes what a real SDK page should cover.
+  Arena is a fictional API, so there are no published SDKs and no real servers. The demo TypeScript SDK below works only against a sandbox that runs in your browser or in Node.
 </Callout>
 
-## Call the API directly
+## TypeScript SDK (demo)
+
+The TypeScript SDK is generated from the Arena OpenAPI spec and covers all 28 operations in 6 resources. It has no runtime dependencies. It lives in the [arena-game repository](https://github.com/sabuj000/arena-game), together with a sandbox that implements the API and a small game that uses both.
+
+There is no package to install. Copy the `sdk/` folder into your project, or clone the repository. The repository runs its TypeScript directly with Node.js 22.6 or later.
+
+### Make a first request
+
+This example runs the SDK against the in-memory sandbox, so it needs no network and no account. It creates a player and submits a score, as in the [Quickstart](/docs/get-started/quickstart).
+
+```ts
+import { Arena } from './sdk/index.ts'
+import { createSandbox } from './sandbox/sandbox.ts'
+import { memoryStorage } from './sandbox/store.ts'
+
+const sandbox = createSandbox({ storage: memoryStorage() })
+const arena = new Arena({ apiKey: 'sk_test_demo', fetch: sandbox.fetch })
+
+const player = await arena.players.create({ display_name: 'NovaKnight' })
+const score = await arena.leaderboards.submitScore('weekly', { player_id: player.id, score: 2400 })
+console.log(score.rank)
+```
+
+To point the SDK at a server, leave out `fetch` and set `baseUrl`. The default base URL is `https://api.arena.example/v1`, which does not exist.
+
+<Callout type="warning">
+  Keep secret keys (`sk_`) on your server. The demo game puts a sandbox key in the browser only because the sandbox is not a real service. A real game must never ship a secret key.
+</Callout>
+
+### Options
+
+<ParamTable
+  rows={[
+    { name: 'apiKey', type: 'string', desc: 'Required. A secret key (sk_) or a publishable key (pk_).' },
+    { name: 'baseUrl', type: 'string', desc: 'The API base URL. Defaults to https://api.arena.example/v1.' },
+    { name: 'version', type: 'string', desc: 'Sends the Arena-Version header. If you leave it out, the SDK sends no version header, so your account version applies. The SDK does not pin a version itself.' },
+    { name: 'maxRetries', type: 'integer', desc: 'Retries after a failed attempt. The default is 2.' },
+    { name: 'fetch', type: 'function', desc: 'A fetch function to use instead of the global fetch. The game passes the sandbox here.' },
+    { name: 'onRequest', type: 'function', desc: 'Called once per attempt with the method, path, status, duration and attempt number. Use it for logging.' },
+  ]}
+/>
+
+### Resources
+
+<ParamTable
+  rows={[
+    { name: 'arena.players', type: 'resource', desc: 'create, list, retrieve, update, delete' },
+    { name: 'arena.matches', type: 'resource', desc: 'create, list, retrieve, join, start, end, cancel' },
+    { name: 'arena.leaderboards', type: 'resource', desc: 'list, retrieve, submitScore, entries, playerEntry' },
+    { name: 'arena.inventory', type: 'resource', desc: 'list, grant, consume' },
+    { name: 'arena.achievements', type: 'resource', desc: 'list, listForPlayer, unlock' },
+    { name: 'arena.purchases', type: 'resource', desc: 'create, list, retrieve, refund, listEntitlements' },
+  ]}
+/>
+
+### Retries and idempotency keys
+
+The SDK retries a request after a network error, a `429` response or a `500` response, up to `maxRetries` times. For a `429` it waits for the `Retry-After` header, or one second if the header is missing. For the other two it waits with exponential backoff that starts at about 500 ms. It does not retry other `5xx` statuses or any `4xx` status. When the retries run out after a network error, it throws `ArenaConnectionError`.
+
+The SDK sets an `Idempotency-Key` header on every `POST` request and uses the same key for each retry of that request, so a retry cannot repeat an action such as a purchase. To choose the key yourself, pass `{ idempotencyKey }` as the last argument. See [Errors and retries](/docs/guides/errors-and-retries) for the underlying rules.
+
+### Errors
+
+A response with a status of 400 or higher throws `ArenaError`. It has `status`, `type`, `code`, `param` and `requestId`, which match the [error object](/docs/api/conventions). Branch on `code`, not on the message.
+
+```ts
+import { ArenaError } from './sdk/index.ts'
+
+try {
+  await arena.players.create({ display_name: 'ab' })
+} catch (error) {
+  if (error instanceof ArenaError && error.code === 'invalid_display_name') {
+    // Ask the player for a longer name.
+  }
+}
+```
+
+### Pagination
+
+List calls return `data`, `has_more` and `next_cursor`. The `paginate` helper walks every page.
+
+```ts
+import { paginate } from './sdk/index.ts'
+
+for await (const player of paginate((cursor) => arena.players.list({ limit: 50, cursor }))) {
+  console.log(player.display_name)
+}
+```
+
+### Known limits
+
+- The OpenAPI spec does not describe the body of list responses, the leaderboard entry responses, or the achievement unlock response. The SDK defines those types itself, so they can differ from a future spec.
+- The sandbox is not Arena. It is an implementation written for this demo, checked against the spec by a contract test.
+
+## Arena Reflex, a demo game
+
+Arena Reflex is a 20-second reaction game in the same repository. Each action in it is an SDK call, and the game shows every call as it happens.
+
+<ParamTable
+  rows={[
+    { name: 'Pick a name', type: 'POST /players', desc: 'Shows the invalid_display_name and display_name_taken errors.' },
+    { name: 'Start a match', type: 'POST /matches', desc: 'Creates a ranked match against RivalBot, then starts it.' },
+    { name: 'Finish a round', type: 'POST /matches/{match_id}/end', desc: 'Ends the match, submits the score to the weekly and lifetime leaderboards, unlocks achievements and grants coins.' },
+    { name: 'Use a booster pack', type: 'POST /players/{player_id}/inventory/consume', desc: 'Uses up one item to start a round with a combo.' },
+    { name: 'Shop', type: 'POST /purchases', desc: 'Pays with the test token tok_test_success. The token tok_test_declined shows a decline.' },
+  ]}
+/>
+
+## Call the API directly from any language
 
 Arena is a standard JSON REST API. Any HTTP client works.
 
@@ -71,8 +179,8 @@ The TypeScript example uses the built-in `fetch` in Node.js 18 or later. The Pyt
 
 ## What a real SDK page should list
 
+The demo SDK covers some of these. A real SDK page also needs:
+
 - Supported languages, minimum runtime versions and install commands.
-- A first request that matches the [Quickstart](/docs/get-started/quickstart).
-- How the SDK retries, and whether it sets `Idempotency-Key` for you.
 - The API version the SDK pins. See [Conventions](/docs/api/conventions#versioning).
 - Where to report bugs.
