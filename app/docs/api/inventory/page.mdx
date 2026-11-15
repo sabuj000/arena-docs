@@ -34,10 +34,7 @@ You change inventory in three ways: a grant, a consume, or a [purchase](/docs/ap
 
 Returns the items the player owns with a quantity above zero.
 
-```bash
-curl https://api.arena.example/v1/players/plr_123/inventory \
-  -H "Authorization: Bearer sk_test_YOUR_KEY"
-```
+<Snippets operation="GET /players/{player_id}/inventory" />
 
 ```json
 {
@@ -64,13 +61,7 @@ Adds items to a player with no payment. Send an `Idempotency-Key` header. Sends 
   ]}
 />
 
-```bash
-curl https://api.arena.example/v1/players/plr_123/inventory/grants \
-  -H "Authorization: Bearer sk_test_YOUR_KEY" \
-  -H "Idempotency-Key: reward-season-1-plr_123" \
-  -H "Content-Type: application/json" \
-  -d '{"item_id": "itm_arena_skin", "quantity": 1, "reason": "season_1_reward"}'
-```
+<Snippets operation="POST /players/{player_id}/inventory/grants" />
 
 ```json
 {
@@ -104,12 +95,6 @@ Removes items, for example when a player uses a potion. Send an `Idempotency-Key
   ]}
 />
 
-```bash
-curl https://api.arena.example/v1/players/plr_123/inventory/consume \
-  -H "Authorization: Bearer sk_test_YOUR_KEY" \
-  -H "Idempotency-Key: consume-0001" \
-  -H "Content-Type: application/json" \
-  -d '{"item_id": "itm_gold_pack", "quantity": 1}'
-```
+<Snippets operation="POST /players/{player_id}/inventory/consume" />
 
 Returns the updated inventory item. If the player owns fewer than `quantity`, the request fails with `409` and the code `insufficient_quantity`, and nothing is removed.

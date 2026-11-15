@@ -67,10 +67,36 @@ export function checkSpec({ root = process.cwd(), docsDir = 'app/docs', specPath
     Object.values(spec.components.schemas).map((s) => [s.properties.object?.const, s]),
   )
 
+  // Every operation needs an x-example that fills its path and matches its body schema.
+  for (const [key, op] of specOps) {
+    const ex = op['x-example']
+    if (!ex) {
+      errors.push(`${specPath}: ${key} has no x-example`)
+      continue
+    }
+    for (const name of key.match(/\{\w+\}/g)?.map((x) => x.slice(1, -1)) ?? [])
+      if (!ex.path?.[name]) errors.push(`${specPath}: ${key} x-example has no value for {${name}}`)
+    const schema = op.requestBody?.content?.['application/json']?.schema
+    if (ex.body && schema) {
+      const props = schema.properties || {}
+      for (const k of Object.keys(ex.body))
+        if (!props[k]) errors.push(`${specPath}: ${key} x-example body has "${k}", which the schema does not define`)
+      for (const k of schema.required || [])
+        if (!(k in ex.body)) errors.push(`${specPath}: ${key} x-example body is missing required "${k}"`)
+    }
+    if (schema && schema.required?.length && !ex.body) errors.push(`${specPath}: ${key} x-example needs a body`)
+  }
+
   for (const file of files) {
     const rel = relative(root, file)
     const src = readFileSync(file, 'utf8')
     const isApiPage = rel.includes(`${sep}api${sep}`)
+
+    // --- <Snippets> must point at real operations ---
+    for (const sm of src.matchAll(/<Snippets\s+operation="([^"]+)"/g)) {
+      const [sMethod, sPath] = sm[1].split(' ')
+      if (!specOps.has(`${sMethod} /v1${sPath}`)) errors.push(`${rel}: <Snippets operation="${sm[1]}"> is not in the spec`)
+    }
 
     // --- Operation sections (API reference pages only) ---
     if (isApiPage) {
@@ -81,6 +107,8 @@ export function checkSpec({ root = process.cwd(), docsDir = 'app/docs', specPath
         const key = `${m[1]} ${m[2]}`
         const section = part.split(/\n## /)[0]
         documented.add(key)
+        if (!section.includes(`<Snippets operation="${key.replace(' /v1', ' ')}"`))
+          errors.push(`${rel}: ${key} has no <Snippets> example`)
         const op = specOps.get(key)
         if (!op) {
           errors.push(`${rel}: ${key} is documented but is not in the spec`)

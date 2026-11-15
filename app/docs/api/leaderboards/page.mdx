@@ -55,16 +55,15 @@ Leaderboards are configured in the dashboard. The API reads them and records sco
 
 Returns all leaderboards. Works with a publishable key.
 
-```bash
-curl https://api.arena.example/v1/leaderboards \
-  -H "Authorization: Bearer pk_test_YOUR_KEY"
-```
+<Snippets operation="GET /leaderboards" />
 
 ## Retrieve a leaderboard
 
 <Endpoint method="GET" path="/v1/leaderboards/{leaderboard_id}" />
 
 Returns the leaderboard, or `404` with the code `leaderboard_not_found`.
+
+<Snippets operation="GET /leaderboards/{leaderboard_id}" />
 
 ## Submit a score
 
@@ -80,13 +79,7 @@ Records a score. Requires a secret key. Send an `Idempotency-Key` header.
   ]}
 />
 
-```bash
-curl https://api.arena.example/v1/leaderboards/weekly/scores \
-  -H "Authorization: Bearer sk_test_YOUR_KEY" \
-  -H "Idempotency-Key: score-0001" \
-  -H "Content-Type: application/json" \
-  -d '{"player_id": "plr_123", "score": 4200}'
-```
+<Snippets operation="POST /leaderboards/{leaderboard_id}/scores" />
 
 Returns `201` and the score. Sends `leaderboard.score_submitted`.
 
@@ -115,10 +108,7 @@ Returns ranked entries, best first. Works with a publishable key.
   ]}
 />
 
-```bash
-curl "https://api.arena.example/v1/leaderboards/weekly/entries?limit=10" \
-  -H "Authorization: Bearer pk_test_YOUR_KEY"
-```
+<Snippets operation="GET /leaderboards/{leaderboard_id}/entries" />
 
 ```json
 {
@@ -138,7 +128,4 @@ curl "https://api.arena.example/v1/leaderboards/weekly/entries?limit=10" \
 
 Returns one player rank and score. Returns `404` with the code `entry_not_found` if the player has no score on this leaderboard.
 
-```bash
-curl https://api.arena.example/v1/leaderboards/weekly/players/plr_123 \
-  -H "Authorization: Bearer pk_test_YOUR_KEY"
-```
+<Snippets operation="GET /leaderboards/{leaderboard_id}/players/{player_id}" />

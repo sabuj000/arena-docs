@@ -20,12 +20,12 @@ Documentation treated as code, with an AI agent in the loop and checks that do n
 |---|---|
 | `npm run check:docs` | Pages missing from the nav, missing metadata, markdown tables, empty table descriptions, broken links and anchors |
 | `npm run check:spec` | Docs that disagree with `openapi/arena.json`: endpoints, parameters, required flags, limits, enums, error codes, webhook events, JSON example keys |
-| `npm run test:seeded` | Plants 12 known mistakes in a temporary copy of the docs and confirms the checker catches each one |
+| `npm run test:seeded` | Plants 14 known mistakes in a temporary copy of the docs and confirms the checker catches each one |
 | Build | `next build` fails on broken MDX |
 
 ### What the numbers mean
 
-The seeded test catches 12 of 12 planted mistakes. I wrote those mistakes, so this proves the checker works. It does not measure how accurate an AI reviewer is. The checker verifies tables, parameters, error codes and JSON examples. It does not read free prose for wrong claims, and the spec has no definitions for idempotency or rate limits, so those pages are checked for structure only.
+The seeded test catches 14 of 14 planted mistakes. I wrote those mistakes, so this proves the checker works. It does not measure how accurate an AI reviewer is. The checker verifies tables, parameters, error codes and JSON examples. It does not read free prose for wrong claims, and the spec has no definitions for idempotency or rate limits, so those pages are checked for structure only.
 
 ## Stack
 
@@ -33,7 +33,7 @@ The seeded test catches 12 of 12 planted mistakes. I wrote those mistakes, so th
 - Pages are MDX files at `app/docs/**/page.mdx`.
 - Reusable components in `components/`: `Callout`, `Card`, `CardGroup`, `CodeGroup`, `Endpoint`, `ParamTable`, `Hero`.
 - The sidebar and `/llms.txt` are generated from `lib/nav.ts`.
-- `openapi/arena.json` is the source of truth for API behavior.
+- `openapi/arena.json` is the source of truth for API behavior. It also holds one `x-example` per operation. The `<Snippets operation="POST /players" />` component builds the cURL, TypeScript, Python and PHP examples from it at build time, so the examples cannot drift from the spec.
 - `docs-toolkit/` holds the agent skills, templates and the Arena project profile. `CLAUDE.md` tells an agent how to raise a docs PR.
 
 ## Run locally

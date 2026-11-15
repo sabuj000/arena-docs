@@ -36,10 +36,7 @@ An achievement is a milestone a player can earn once, for example `first_win`. A
 
 Returns all achievements that are not hidden. Works with a publishable key.
 
-```bash
-curl https://api.arena.example/v1/achievements \
-  -H "Authorization: Bearer pk_test_YOUR_KEY"
-```
+<Snippets operation="GET /achievements" />
 
 ## List a player achievements
 
@@ -58,16 +55,15 @@ Returns the achievements the player has unlocked, including hidden ones, with th
 }
 ```
 
+<Snippets operation="GET /players/{player_id}/achievements" />
+
 ## Unlock an achievement
 
 <Endpoint method="POST" path="/v1/players/{player_id}/achievements/{achievement_id}/unlock" />
 
 Records that the player unlocked the achievement. Requires a secret key. Sends `achievement.unlocked`.
 
-```bash
-curl -X POST https://api.arena.example/v1/players/plr_123/achievements/ach_first_win/unlock \
-  -H "Authorization: Bearer sk_test_YOUR_KEY"
-```
+<Snippets operation="POST /players/{player_id}/achievements/{achievement_id}/unlock" />
 
 ```json
 {

@@ -66,13 +66,7 @@ A match moves through these states. Other transitions are rejected with `409`.
   ]}
 />
 
-```bash
-curl https://api.arena.example/v1/matches \
-  -H "Authorization: Bearer sk_test_YOUR_KEY" \
-  -H "Idempotency-Key: match-create-0001" \
-  -H "Content-Type: application/json" \
-  -d '{"mode": "ranked", "max_players": 2}'
-```
+<Snippets operation="POST /matches" />
 
 Returns `201` and the match in the `pending` state.
 
@@ -81,6 +75,8 @@ Returns `201` and the match in the `pending` state.
 <Endpoint method="GET" path="/v1/matches/{match_id}" />
 
 Returns the match, or `404` with the code `match_not_found`.
+
+<Snippets operation="GET /matches/{match_id}" />
 
 ## List matches
 
@@ -97,6 +93,8 @@ Returns matches, newest first.
   ]}
 />
 
+<Snippets operation="GET /matches" />
+
 ## Join a match
 
 <Endpoint method="POST" path="/v1/matches/{match_id}/join" />
@@ -109,13 +107,7 @@ Adds a player to a `pending` match.
   ]}
 />
 
-```bash
-curl https://api.arena.example/v1/matches/mch_77/join \
-  -H "Authorization: Bearer sk_test_YOUR_KEY" \
-  -H "Idempotency-Key: join-mch_77-plr_456" \
-  -H "Content-Type: application/json" \
-  -d '{"player_id": "plr_456"}'
-```
+<Snippets operation="POST /matches/{match_id}/join" />
 
 <ParamTable
   rows={[
@@ -131,10 +123,7 @@ curl https://api.arena.example/v1/matches/mch_77/join \
 
 Moves a `pending` match to `active`. The match needs at least 2 players. Sends `match.started`.
 
-```bash
-curl -X POST https://api.arena.example/v1/matches/mch_77/start \
-  -H "Authorization: Bearer sk_test_YOUR_KEY"
-```
+<Snippets operation="POST /matches/{match_id}/start" />
 
 Returns `409` with the code `match_not_startable` if the match is not pending or has too few players.
 
@@ -153,13 +142,7 @@ Moves an `active` match to `completed` and stores the results. Sends `match.comp
   ]}
 />
 
-```bash
-curl https://api.arena.example/v1/matches/mch_77/end \
-  -H "Authorization: Bearer sk_test_YOUR_KEY" \
-  -H "Idempotency-Key: match-end-0001" \
-  -H "Content-Type: application/json" \
-  -d '{"results": [{"player_id": "plr_123", "placement": 1, "score": 4200}, {"player_id": "plr_456", "placement": 2, "score": 3100}]}'
-```
+<Snippets operation="POST /matches/{match_id}/end" />
 
 <ParamTable
   rows={[
@@ -178,7 +161,4 @@ curl https://api.arena.example/v1/matches/mch_77/end \
 
 Moves a `pending` or `active` match to `cancelled`. Sends `match.cancelled`. A completed match cannot be cancelled and returns `match_not_cancellable`.
 
-```bash
-curl -X POST https://api.arena.example/v1/matches/mch_77/cancel \
-  -H "Authorization: Bearer sk_test_YOUR_KEY"
-```
+<Snippets operation="POST /matches/{match_id}/cancel" />

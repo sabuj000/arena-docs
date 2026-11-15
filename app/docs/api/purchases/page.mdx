@@ -58,78 +58,7 @@ Send an `Idempotency-Key` header so a retry never charges twice.
   ]}
 />
 
-<CodeGroup>
-
-```bash
-curl https://api.arena.example/v1/purchases \
-  -H "Authorization: Bearer sk_test_YOUR_KEY" \
-  -H "Idempotency-Key: purchase-0001" \
-  -H "Content-Type: application/json" \
-  -d '{"player_id": "plr_123", "item_id": "itm_gold_pack", "quantity": 1, "payment_token": "tok_test_success"}'
-```
-
-```ts
-const res = await fetch('https://api.arena.example/v1/purchases', {
-  method: 'POST',
-  headers: {
-    Authorization: `Bearer ${process.env.ARENA_SECRET_KEY}`,
-    'Idempotency-Key': 'purchase-0001',
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({
-    player_id: 'plr_123',
-    item_id: 'itm_gold_pack',
-    quantity: 1,
-    payment_token: 'tok_test_success',
-  }),
-})
-const purchase = await res.json()
-```
-
-```python
-import os
-import requests
-
-res = requests.post(
-    "https://api.arena.example/v1/purchases",
-    headers={
-        "Authorization": f"Bearer {os.environ['ARENA_SECRET_KEY']}",
-        "Idempotency-Key": "purchase-0001",
-    },
-    json={
-        "player_id": "plr_123",
-        "item_id": "itm_gold_pack",
-        "quantity": 1,
-        "payment_token": "tok_test_success",
-    },
-    timeout=10,
-)
-purchase = res.json()
-```
-
-```php
-<?php
-$ch = curl_init('https://api.arena.example/v1/purchases');
-curl_setopt_array($ch, [
-    CURLOPT_POST => true,
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_HTTPHEADER => [
-        'Authorization: Bearer ' . getenv('ARENA_SECRET_KEY'),
-        'Idempotency-Key: purchase-0001',
-        'Content-Type: application/json',
-    ],
-    CURLOPT_POSTFIELDS => json_encode([
-        'player_id' => 'plr_123',
-        'item_id' => 'itm_gold_pack',
-        'quantity' => 1,
-        'payment_token' => 'tok_test_success',
-    ]),
-]);
-$purchase = json_decode(curl_exec($ch), true);
-curl_close($ch);
-```
-
-</CodeGroup>
+<Snippets operation="POST /purchases" />
 
 Returns `201` and the purchase. Sends `purchase.completed` when it succeeds.
 
@@ -147,6 +76,8 @@ Returns `201` and the purchase. Sends `purchase.completed` when it succeeds.
 
 Returns the purchase, or `404` with the code `purchase_not_found`.
 
+<Snippets operation="GET /purchases/{purchase_id}" />
+
 ## List purchases
 
 <Endpoint method="GET" path="/v1/purchases" />
@@ -162,6 +93,8 @@ Returns purchases, newest first.
   ]}
 />
 
+<Snippets operation="GET /purchases" />
+
 ## Refund a purchase
 
 <Endpoint method="POST" path="/v1/purchases/{purchase_id}/refund" />
@@ -174,13 +107,7 @@ Refunds a `succeeded` purchase within 14 days of creation. Removes the granted i
   ]}
 />
 
-```bash
-curl https://api.arena.example/v1/purchases/pur_901/refund \
-  -H "Authorization: Bearer sk_test_YOUR_KEY" \
-  -H "Idempotency-Key: refund-pur_901" \
-  -H "Content-Type: application/json" \
-  -d '{"reason": "customer_request"}'
-```
+<Snippets operation="POST /purchases/{purchase_id}/refund" />
 
 ```json
 {
@@ -222,3 +149,6 @@ Returns the non-consumable items a player has bought and keeps for good, such as
 ```
 
 A refund removes the entitlement.
+
+<Snippets operation="GET /players/{player_id}/entitlements" />
+
