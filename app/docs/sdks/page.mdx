@@ -105,7 +105,7 @@ for await (const player of paginate((cursor) => arena.players.list({ limit: 50, 
 
 ## Demo games
 
-You can play the games at [arena-game-sooty.vercel.app](https://arena-game-sooty.vercel.app). The sandbox runs in your browser, so nothing is sent to a real service.
+You can play the games at [arena-game-sooty.vercel.app](https://arena-game-sooty.vercel.app). The sandbox runs in your browser, so nothing is sent to a real service. Each game has a "How to play" panel and a practice round. The practice round runs in a separate throwaway sandbox, so your score, coins and shop items do not change.
 
 The repository has one hub with five games. They share one player, one inventory and one shop, and each game has its own leaderboards. Every action is an SDK call, and the games show each call as it happens. To use the same approach for other kinds of game, see [Model any type of game with Arena](/docs/guides/game-patterns).
 
@@ -115,7 +115,7 @@ The repository has one hub with five games. They share one player, one inventory
     { name: 'Memory sequence', type: 'memory', desc: 'Repeat a growing pattern. A booster pack gives one second chance.' },
     { name: 'Word scramble', type: 'words', desc: 'Unscramble words in 60 seconds. A booster pack adds 10 seconds.' },
     { name: 'Tile merge', type: 'puzzle', desc: 'A turn-based sliding puzzle with no timer. A booster pack gives one undo.' },
-    { name: 'Quick Draw duel', type: 'head-to-head', desc: 'Play alone against the system, or with a second player on the same device. A booster pack forgives your first false start.' },
+    { name: 'Connect Four', type: 'head-to-head', desc: 'Take turns dropping discs and get four in a row. Play alone against the system, or with a second player on the same device. A booster pack takes back your last move once.' },
   ]}
 />
 

@@ -5,7 +5,7 @@ export const metadata = {
 
 # Model any type of game with Arena
 
-Arena does not know the rules of your game. Your game server decides what happened, and the Arena API records it. This guide shows how to map four kinds of game onto the same few resources, so one integration approach works for a reaction game, a puzzle, a duel or a free-for-all.
+Arena does not know the rules of your game. Your game server decides what happened, and the Arena API records it. This guide shows how to map four kinds of game onto the same few resources, so one integration approach works for a reaction game, a puzzle, a board game or a free-for-all.
 
 ## The four building blocks
 
@@ -121,7 +121,7 @@ The [arena-game repository](https://github.com/sabuj000/arena-game) has five sma
     { name: 'Memory sequence', type: 'score attack', desc: 'Repeat a growing pattern. The match ends on the first mistake. Leaderboards: memory_weekly and memory_lifetime.' },
     { name: 'Word scramble', type: 'score attack', desc: 'Unscramble words in 60 seconds. The match ends when time is up. Leaderboards: words_weekly and words_lifetime.' },
     { name: 'Tile merge', type: 'turn-based, no timer', desc: 'Slide and merge tiles. The match ends when no move is left or the player ends the game. Leaderboards: tiles_weekly and tiles_lifetime.' },
-    { name: 'Quick Draw duel', type: 'head-to-head', desc: 'Press first after the signal. It can be played by one person against a bot player, or by two people on one device. In two-player mode both players get a score, achievements and coins. Leaderboards: duel_weekly and duel_lifetime.' },
+    { name: 'Connect Four', type: 'head-to-head', desc: 'Take turns dropping discs and get four in a row. It can be played by one person against a bot player, or by two people on one device. A win scores 100 plus a bonus for each disc not needed, and a draw scores 50 for both players and puts both at placement 1. In two-player mode both players get a score, achievements and coins. Leaderboards: connect4_weekly and connect4_lifetime.' },
   ]}
 />
 
