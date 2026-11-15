@@ -16,4 +16,5 @@ This repo is a docs-as-code demo for a fictional API. Docs are MDX in `app/docs/
 
 - Never merge your own PR.
 - Never edit `openapi/arena.json` to make a doc pass. Change it only when the request is an API change.
+- An API change also needs a matching PR in `sabuj000/arena-game` (spec copy, `npm run gen:sdk`, sandbox and contract tests). Open it after the docs PR merges. Its CI fails until the copy matches `main` here.
 - Arena is fictional. Keep the fictional notices.
