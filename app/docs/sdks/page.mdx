@@ -100,7 +100,7 @@ for await (const player of paginate((cursor) => arena.players.list({ limit: 50, 
 
 ### Known limits
 
-- The OpenAPI spec does not describe the body of list responses, the leaderboard entry responses, or the achievement unlock response. The SDK defines those types itself, so they can differ from a future spec.
+- The spec types every response body, but not the objects nested in `Match.results` and `Purchase.refund`, and it does not say which fields can be `null`, such as `started_at` on a pending match. The SDK defines those shapes itself, so they can differ from a future spec.
 - The sandbox is not Arena. It is an implementation written for this demo, checked against the spec by a contract test.
 
 ## Demo games
