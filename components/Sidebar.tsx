@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { nav } from '../lib/nav'
+import { SearchButton } from './SearchButton'
 
 export function Sidebar() {
   const pathname = usePathname()
@@ -30,15 +31,18 @@ export function Sidebar() {
         <Link href="/" className="topbar-brand">
           Arena API
         </Link>
-        <button
-          type="button"
-          className="menu-button"
-          aria-expanded={open}
-          aria-controls="site-nav"
-          onClick={() => setOpen((value) => !value)}
-        >
-          {open ? 'Close' : 'Menu'}
-        </button>
+        <div className="topbar-actions">
+          <SearchButton variant="topbar" />
+          <button
+            type="button"
+            className="menu-button"
+            aria-expanded={open}
+            aria-controls="site-nav"
+            onClick={() => setOpen((value) => !value)}
+          >
+            {open ? 'Close' : 'Menu'}
+          </button>
+        </div>
       </header>
       <nav
         id="site-nav"
@@ -49,6 +53,7 @@ export function Sidebar() {
         <Link href="/" className="sidebar-brand">
           Arena API
         </Link>
+        <SearchButton variant="sidebar" />
         {nav.map((group) => (
           <div key={group.title} className="sidebar-group">
             <p className="sidebar-group-title">{group.title}</p>

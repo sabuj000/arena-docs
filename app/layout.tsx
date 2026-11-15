@@ -1,9 +1,12 @@
 import './globals.css'
 import './docs.css'
 import './code.css'
+import './toc-search.css'
 import './responsive.css'
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
+import { PageToc } from '../components/PageToc'
+import { SearchDialog } from '../components/SearchDialog'
 import { Sidebar } from '../components/Sidebar'
 
 export const metadata: Metadata = {
@@ -21,8 +24,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <div className="shell">
           <Sidebar />
-          <main className="content">{children}</main>
+          <main className="content">
+            <PageToc variant="inline" />
+            {children}
+          </main>
+          <PageToc variant="aside" />
         </div>
+        <SearchDialog />
       </body>
     </html>
   )
