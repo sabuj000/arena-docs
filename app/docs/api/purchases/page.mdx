@@ -67,6 +67,7 @@ Returns `201` and the purchase. Sends `purchase.completed` when it succeeds.
     { name: 'payment_declined', type: '402', desc: 'The payment method was declined. The purchase is saved with status failed.' },
     { name: 'item_not_found', type: '404', desc: 'The item does not exist in this mode.' },
     { name: 'item_not_for_sale', type: '422', desc: 'The item is not available for purchase.' },
+    { name: 'player_not_found', type: '404', desc: 'The player does not exist in this mode.' },
   ]}
 />
 
@@ -127,6 +128,7 @@ If the player already consumed some of the items, `revoked_quantity` is lower th
 <ParamTable
   rows={[
     { name: 'purchase_already_refunded', type: '409', desc: 'The purchase was refunded before.' },
+    { name: 'purchase_not_found', type: '404', desc: 'The purchase does not exist in this mode.' },
     { name: 'purchase_not_refundable', type: '409', desc: 'The purchase is not succeeded, or it is older than 14 days.' },
   ]}
 />
@@ -151,4 +153,10 @@ Returns the non-consumable items a player has bought and keeps for good, such as
 A refund removes the entitlement.
 
 <Snippets operation="GET /players/{player_id}/entitlements" />
+
+<ParamTable
+  rows={[
+    { name: 'player_not_found', type: '404', desc: 'The player does not exist in this mode.' },
+  ]}
+/>
 

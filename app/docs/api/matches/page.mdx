@@ -68,6 +68,14 @@ A match moves through these states. Other transitions are rejected with `409`.
 
 <Snippets operation="POST /matches" />
 
+<ParamTable
+  rows={[
+    { name: 'match_full', type: '409', desc: 'player_ids has more players than max_players.' },
+    { name: 'player_not_found', type: '404', desc: 'A player in player_ids does not exist in this mode.' },
+    { name: 'player_suspended', type: '422', desc: 'A player in player_ids is suspended.' },
+  ]}
+/>
+
 Returns `201` and the match in the `pending` state.
 
 ## Retrieve a match
@@ -112,7 +120,9 @@ Adds a player to a `pending` match.
 <ParamTable
   rows={[
     { name: 'match_full', type: '409', desc: 'The match already has max_players players.' },
+    { name: 'match_not_found', type: '404', desc: 'The match does not exist in this mode.' },
     { name: 'match_not_joinable', type: '409', desc: 'The match is not pending.' },
+    { name: 'player_not_found', type: '404', desc: 'The player does not exist in this mode.' },
     { name: 'player_suspended', type: '422', desc: 'The player is suspended.' },
   ]}
 />
@@ -125,7 +135,12 @@ Moves a `pending` match to `active`. The match needs at least 2 players. Sends `
 
 <Snippets operation="POST /matches/{match_id}/start" />
 
-Returns `409` with the code `match_not_startable` if the match is not pending or has too few players.
+<ParamTable
+  rows={[
+    { name: 'match_not_found', type: '404', desc: 'The match does not exist in this mode.' },
+    { name: 'match_not_startable', type: '409', desc: 'The match is not pending or has too few players.' },
+  ]}
+/>
 
 ## End a match
 
@@ -135,9 +150,9 @@ Moves an `active` match to `completed` and stores the results. Sends `match.comp
 
 <ParamTable
   rows={[
-    { name: 'results', type: 'array', required: true, desc: 'One entry per player.' },
+    { name: 'results', type: 'array', required: true, desc: 'One entry per player to place. The match returns them in placement order.' },
     { name: 'results[].player_id', type: 'string', required: true, desc: 'A player who joined the match.' },
-    { name: 'results[].placement', type: 'integer', required: true, desc: 'Final position, starting at 1.' },
+    { name: 'results[].placement', type: 'integer', required: true, desc: 'Final position, starting at 1. Players can share a placement to record a draw. Placements do not have to be consecutive.' },
     { name: 'results[].score', type: 'integer', desc: 'The player score for this match.' },
   ]}
 />
@@ -147,6 +162,7 @@ Moves an `active` match to `completed` and stores the results. Sends `match.comp
 <ParamTable
   rows={[
     { name: 'match_not_active', type: '409', desc: 'The match is not active.' },
+    { name: 'match_not_found', type: '404', desc: 'The match does not exist in this mode.' },
     { name: 'player_not_in_match', type: '422', desc: 'A result references a player who did not join the match.' },
   ]}
 />
@@ -159,6 +175,13 @@ Moves an `active` match to `completed` and stores the results. Sends `match.comp
 
 <Endpoint method="POST" path="/v1/matches/{match_id}/cancel" />
 
-Moves a `pending` or `active` match to `cancelled`. Sends `match.cancelled`. A completed match cannot be cancelled and returns `match_not_cancellable`.
+Moves a `pending` or `active` match to `cancelled`. Sends `match.cancelled`.
 
 <Snippets operation="POST /matches/{match_id}/cancel" />
+
+<ParamTable
+  rows={[
+    { name: 'match_not_cancellable', type: '409', desc: 'Only a pending or active match can be cancelled.' },
+    { name: 'match_not_found', type: '404', desc: 'The match does not exist in this mode.' },
+  ]}
+/>

@@ -90,6 +90,14 @@ Changes only the fields you send. Sending `metadata` merges keys. Set a key to `
 
 <Snippets operation="PATCH /players/{player_id}" />
 
+<ParamTable
+  rows={[
+    { name: 'display_name_taken', type: '409', desc: 'Another player already uses this name.' },
+    { name: 'invalid_display_name', type: '422', desc: 'The name is too short, too long or contains disallowed characters.' },
+    { name: 'player_not_found', type: '404', desc: 'The player does not exist in this mode.' },
+  ]}
+/>
+
 ## Delete a player
 
 <Endpoint method="DELETE" path="/v1/players/{player_id}" />
@@ -105,6 +113,12 @@ Deletes the player and their inventory, scores and achievements. A `player.delet
 ```json
 { "id": "plr_123", "object": "player", "deleted": true }
 ```
+
+<ParamTable
+  rows={[
+    { name: 'player_not_found', type: '404', desc: 'The player does not exist in this mode.' },
+  ]}
+/>
 
 ## List players
 

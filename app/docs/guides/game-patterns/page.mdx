@@ -27,7 +27,7 @@ Pick the row that is closest to your game, then adjust.
     { name: 'Score attack', type: 'highest score wins', desc: 'A player plays a round alone and gets points, such as a reaction or memory game. Use a leaderboard with sort desc and update_mode best for the top score, and a second one with update_mode sum for total points.' },
     { name: 'Turn-based, no timer', type: 'highest score wins', desc: 'A puzzle that the player ends when the board is stuck or when they choose to stop. Your server decides when the game is over. Then end the match and submit the final score, as in a score attack.' },
     { name: 'Timed or move-limited', type: 'lowest wins', desc: 'A puzzle scored by time or number of moves. Use a leaderboard with sort asc and update_mode best. Submit the time in milliseconds or the move count as the score. Scores are whole numbers of 0 or more.' },
-    { name: 'Head-to-head', type: 'two players', desc: 'Two players race or fight. Create a match with both, end it with a placement for each, and add to a leaderboard with update_mode sum to count wins. When both sides are people, submit a score for each of them. When one side is a bot player, submit scores only for the person.' },
+    { name: 'Head-to-head', type: 'two players', desc: 'Two players race or fight. Create a match with both, end it with a placement for each (give both players placement 1 for a draw), and add to a leaderboard with update_mode sum to count wins. When both sides are people, submit a score for each of them. When one side is a bot player, submit scores only for the person.' },
     { name: 'Free-for-all or team', type: 'up to 16 players', desc: 'Set max_players up to 16 and end the match with a placement for every player. Placements start at 1.' },
   ]}
 />

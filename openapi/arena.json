@@ -142,7 +142,34 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "const": "list"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Player"
+                      }
+                    },
+                    "has_more": {
+                      "type": "boolean"
+                    },
+                    "next_cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "object",
+                    "data",
+                    "has_more",
+                    "next_cursor"
+                  ]
                 }
               }
             }
@@ -200,7 +227,20 @@
         "tags": [
           "Players"
         ],
-        "x-error-codes": [],
+        "x-error-codes": [
+          {
+            "code": "display_name_taken",
+            "status": 409
+          },
+          {
+            "code": "invalid_display_name",
+            "status": 422
+          },
+          {
+            "code": "player_not_found",
+            "status": 404
+          }
+        ],
         "parameters": [
           {
             "name": "player_id",
@@ -266,7 +306,12 @@
         "tags": [
           "Players"
         ],
-        "x-error-codes": [],
+        "x-error-codes": [
+          {
+            "code": "player_not_found",
+            "status": 404
+          }
+        ],
         "parameters": [
           {
             "name": "player_id",
@@ -302,7 +347,20 @@
         "tags": [
           "Matches"
         ],
-        "x-error-codes": [],
+        "x-error-codes": [
+          {
+            "code": "match_full",
+            "status": 409
+          },
+          {
+            "code": "player_not_found",
+            "status": 404
+          },
+          {
+            "code": "player_suspended",
+            "status": 422
+          }
+        ],
         "parameters": [],
         "responses": {
           "201": {
@@ -412,7 +470,34 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "const": "list"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Match"
+                      }
+                    },
+                    "has_more": {
+                      "type": "boolean"
+                    },
+                    "next_cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "object",
+                    "data",
+                    "has_more",
+                    "next_cursor"
+                  ]
                 }
               }
             }
@@ -478,8 +563,16 @@
             "status": 409
           },
           {
+            "code": "match_not_found",
+            "status": 404
+          },
+          {
             "code": "match_not_joinable",
             "status": 409
+          },
+          {
+            "code": "player_not_found",
+            "status": 404
           },
           {
             "code": "player_suspended",
@@ -544,6 +637,10 @@
         ],
         "x-error-codes": [
           {
+            "code": "match_not_found",
+            "status": 404
+          },
+          {
             "code": "match_not_startable",
             "status": 409
           }
@@ -590,6 +687,10 @@
             "status": 409
           },
           {
+            "code": "match_not_found",
+            "status": 404
+          },
+          {
             "code": "player_not_in_match",
             "status": 422
           }
@@ -632,7 +733,8 @@
                         },
                         "placement": {
                           "type": "integer",
-                          "minimum": 1
+                          "minimum": 1,
+                          "description": "Final position, starting at 1. Players can share a placement to record a draw. Placements do not have to be consecutive."
                         },
                         "score": {
                           "type": "integer"
@@ -642,7 +744,8 @@
                         "player_id",
                         "placement"
                       ]
-                    }
+                    },
+                    "description": "One result for each player to place. The match returns them in placement order."
                   }
                 },
                 "required": [
@@ -684,6 +787,10 @@
           {
             "code": "match_not_cancellable",
             "status": 409
+          },
+          {
+            "code": "match_not_found",
+            "status": 404
           }
         ],
         "parameters": [
@@ -730,7 +837,34 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "const": "list"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Leaderboard"
+                      }
+                    },
+                    "has_more": {
+                      "type": "boolean"
+                    },
+                    "next_cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "object",
+                    "data",
+                    "has_more",
+                    "next_cursor"
+                  ]
                 }
               }
             }
@@ -796,15 +930,19 @@
         ],
         "x-error-codes": [
           {
+            "code": "invalid_score",
+            "status": 422
+          },
+          {
+            "code": "leaderboard_not_found",
+            "status": 404
+          },
+          {
             "code": "player_not_found",
             "status": 404
           },
           {
             "code": "player_suspended",
-            "status": 422
-          },
-          {
-            "code": "invalid_score",
             "status": 422
           }
         ],
@@ -873,7 +1011,12 @@
         "tags": [
           "Leaderboards"
         ],
-        "x-error-codes": [],
+        "x-error-codes": [
+          {
+            "code": "leaderboard_not_found",
+            "status": 404
+          }
+        ],
         "parameters": [
           {
             "name": "leaderboard_id",
@@ -909,7 +1052,34 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "const": "list"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/LeaderboardEntry"
+                      }
+                    },
+                    "has_more": {
+                      "type": "boolean"
+                    },
+                    "next_cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "object",
+                    "data",
+                    "has_more",
+                    "next_cursor"
+                  ]
                 }
               }
             }
@@ -939,6 +1109,10 @@
           {
             "code": "entry_not_found",
             "status": 404
+          },
+          {
+            "code": "leaderboard_not_found",
+            "status": 404
           }
         ],
         "parameters": [
@@ -965,7 +1139,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "$ref": "#/components/schemas/LeaderboardEntry"
                 }
               }
             }
@@ -989,7 +1163,12 @@
         "tags": [
           "Inventory"
         ],
-        "x-error-codes": [],
+        "x-error-codes": [
+          {
+            "code": "player_not_found",
+            "status": 404
+          }
+        ],
         "parameters": [
           {
             "name": "player_id",
@@ -1006,7 +1185,34 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "const": "list"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/InventoryItem"
+                      }
+                    },
+                    "has_more": {
+                      "type": "boolean"
+                    },
+                    "next_cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "object",
+                    "data",
+                    "has_more",
+                    "next_cursor"
+                  ]
                 }
               }
             }
@@ -1027,12 +1233,16 @@
         ],
         "x-error-codes": [
           {
+            "code": "item_limit_reached",
+            "status": 422
+          },
+          {
             "code": "item_not_found",
             "status": 404
           },
           {
-            "code": "item_limit_reached",
-            "status": 422
+            "code": "player_not_found",
+            "status": 404
           }
         ],
         "parameters": [
@@ -1106,6 +1316,10 @@
           {
             "code": "insufficient_quantity",
             "status": 409
+          },
+          {
+            "code": "player_not_found",
+            "status": 404
           }
         ],
         "parameters": [
@@ -1178,7 +1392,34 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "const": "list"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Achievement"
+                      }
+                    },
+                    "has_more": {
+                      "type": "boolean"
+                    },
+                    "next_cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "object",
+                    "data",
+                    "has_more",
+                    "next_cursor"
+                  ]
                 }
               }
             }
@@ -1197,7 +1438,12 @@
         "tags": [
           "Achievements"
         ],
-        "x-error-codes": [],
+        "x-error-codes": [
+          {
+            "code": "player_not_found",
+            "status": 404
+          }
+        ],
         "parameters": [
           {
             "name": "player_id",
@@ -1214,7 +1460,34 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "const": "list"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PlayerAchievement"
+                      }
+                    },
+                    "has_more": {
+                      "type": "boolean"
+                    },
+                    "next_cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "object",
+                    "data",
+                    "has_more",
+                    "next_cursor"
+                  ]
                 }
               }
             }
@@ -1267,7 +1540,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "$ref": "#/components/schemas/AchievementUnlock"
                 }
               }
             }
@@ -1290,16 +1563,20 @@
         ],
         "x-error-codes": [
           {
-            "code": "payment_declined",
-            "status": 402
+            "code": "item_not_for_sale",
+            "status": 422
           },
           {
             "code": "item_not_found",
             "status": 404
           },
           {
-            "code": "item_not_for_sale",
-            "status": 422
+            "code": "payment_declined",
+            "status": 402
+          },
+          {
+            "code": "player_not_found",
+            "status": 404
           }
         ],
         "parameters": [],
@@ -1411,7 +1688,34 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "const": "list"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Purchase"
+                      }
+                    },
+                    "has_more": {
+                      "type": "boolean"
+                    },
+                    "next_cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "object",
+                    "data",
+                    "has_more",
+                    "next_cursor"
+                  ]
                 }
               }
             }
@@ -1477,6 +1781,10 @@
             "status": 409
           },
           {
+            "code": "purchase_not_found",
+            "status": 404
+          },
+          {
             "code": "purchase_not_refundable",
             "status": 409
           }
@@ -1540,7 +1848,12 @@
         "tags": [
           "Purchases"
         ],
-        "x-error-codes": [],
+        "x-error-codes": [
+          {
+            "code": "player_not_found",
+            "status": 404
+          }
+        ],
         "parameters": [
           {
             "name": "player_id",
@@ -1557,7 +1870,34 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "const": "list"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Entitlement"
+                      }
+                    },
+                    "has_more": {
+                      "type": "boolean"
+                    },
+                    "next_cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "object",
+                    "data",
+                    "has_more",
+                    "next_cursor"
+                  ]
                 }
               }
             }
@@ -1847,6 +2187,83 @@
             "type": "string"
           }
         }
+      },
+      "LeaderboardEntry": {
+        "type": "object",
+        "properties": {
+          "rank": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "player_id": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "The player display name. Can be missing if the player no longer exists."
+          },
+          "score": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "rank",
+          "player_id",
+          "score"
+        ]
+      },
+      "PlayerAchievement": {
+        "type": "object",
+        "properties": {
+          "achievement_id": {
+            "type": "string"
+          },
+          "unlocked_at": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "achievement_id",
+          "unlocked_at"
+        ]
+      },
+      "AchievementUnlock": {
+        "type": "object",
+        "properties": {
+          "achievement_id": {
+            "type": "string"
+          },
+          "player_id": {
+            "type": "string"
+          },
+          "unlocked_at": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "achievement_id",
+          "player_id",
+          "unlocked_at"
+        ]
+      },
+      "Entitlement": {
+        "type": "object",
+        "properties": {
+          "item_id": {
+            "type": "string"
+          },
+          "purchase_id": {
+            "type": "string"
+          },
+          "granted_at": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "item_id",
+          "purchase_id",
+          "granted_at"
+        ]
       }
     }
   }

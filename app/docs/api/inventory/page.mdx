@@ -47,6 +47,12 @@ Returns the items the player owns with a quantity above zero.
 }
 ```
 
+<ParamTable
+  rows={[
+    { name: 'player_not_found', type: '404', desc: 'The player does not exist in this mode.' },
+  ]}
+/>
+
 ## Grant an item
 
 <Endpoint method="POST" path="/v1/players/{player_id}/inventory/grants" />
@@ -79,6 +85,7 @@ Adds items to a player with no payment. Send an `Idempotency-Key` header. Sends 
   rows={[
     { name: 'item_not_found', type: '404', desc: 'The item does not exist in this mode.' },
     { name: 'item_limit_reached', type: '422', desc: 'The grant would exceed the maximum the player can own.' },
+    { name: 'player_not_found', type: '404', desc: 'The player does not exist in this mode.' },
   ]}
 />
 
@@ -97,4 +104,11 @@ Removes items, for example when a player uses a potion. Send an `Idempotency-Key
 
 <Snippets operation="POST /players/{player_id}/inventory/consume" />
 
-Returns the updated inventory item. If the player owns fewer than `quantity`, the request fails with `409` and the code `insufficient_quantity`, and nothing is removed.
+<ParamTable
+  rows={[
+    { name: 'insufficient_quantity', type: '409', desc: 'The player owns fewer than quantity. Nothing is removed.' },
+    { name: 'player_not_found', type: '404', desc: 'The player does not exist in this mode.' },
+  ]}
+/>
+
+Returns the updated inventory item.
