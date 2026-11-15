@@ -1,0 +1,115 @@
+export const metadata = {
+  title: 'Model any type of game with Arena',
+  description: 'Choose match, leaderboard, achievement and item settings for score-attack, timed, head-to-head and progression games.',
+}
+
+# Model any type of game with Arena
+
+Arena does not know the rules of your game. Your game server decides what happened, and the Arena API records it. This guide shows how to map four kinds of game onto the same few resources, so one integration approach works for a reaction game, a puzzle, a duel or a free-for-all.
+
+## The four building blocks
+
+<ParamTable
+  rows={[
+    { name: 'Match', type: 'session', desc: 'One game session. You create it, start it, then end it with results or cancel it. A match needs at least 2 players to start and allows up to 16.' },
+    { name: 'Leaderboard', type: 'ranking', desc: 'A ranking of scores. You choose sort (desc or asc), update_mode (best, latest or sum) and reset (never, daily, weekly or monthly) when you configure it in the dashboard.' },
+    { name: 'Achievement', type: 'milestone', desc: 'A milestone a player earns once. It can be hidden until the player unlocks it.' },
+    { name: 'Item', type: 'inventory', desc: 'Something a player owns, such as a booster or a skin. Items are defined in the dashboard. Grant them as rewards or sell them with a purchase.' },
+  ]}
+/>
+
+## Choose a pattern
+
+Pick the row that is closest to your game, then adjust.
+
+<ParamTable
+  rows={[
+    { name: 'Score attack', type: 'highest score wins', desc: 'A player plays a round alone and gets points, such as a reaction or memory game. Use a leaderboard with sort desc and update_mode best for the top score, and a second one with update_mode sum for total points.' },
+    { name: 'Timed or move-limited', type: 'lowest wins', desc: 'A puzzle scored by time or number of moves. Use a leaderboard with sort asc and update_mode best. Submit the time in milliseconds or the move count as the score. Scores are whole numbers of 0 or more.' },
+    { name: 'Head-to-head', type: 'two players', desc: 'Two players race or fight. Create a match with both, end it with a placement for each, and add to a leaderboard with update_mode sum to count wins.' },
+    { name: 'Free-for-all or team', type: 'up to 16 players', desc: 'Set max_players up to 16 and end the match with a placement for every player. Placements start at 1.' },
+  ]}
+/>
+
+<Callout type="note">
+  A match must have at least 2 players before you can start it. A game where one person plays alone still needs a second player in the match, for example a bot player that you create once and reuse. This is a modeling choice, not an API feature.
+</Callout>
+
+## The standard round
+
+Every pattern follows the same sequence. Your server makes these calls, in this order.
+
+<ParamTable
+  rows={[
+    { name: '1. Create the match', type: 'POST /v1/matches', desc: 'Send mode (ranked or casual), max_players and the player_ids.' },
+    { name: '2. Start the match', type: 'POST /v1/matches/{match_id}/start', desc: 'The match must be pending and have at least 2 players.' },
+    { name: '3. Play', type: 'your server', desc: 'Run the game. Arena is not involved while the round is played.' },
+    { name: '4. End the match', type: 'POST /v1/matches/{match_id}/end', desc: 'Send results with a player_id and a placement for each player. The score is optional.' },
+    { name: '5. Submit scores', type: 'POST /v1/leaderboards/{leaderboard_id}/scores', desc: 'Send the player_id and a score. Add the match_id to link the score to the match.' },
+    { name: '6. Unlock achievements', type: 'POST /v1/players/{player_id}/achievements/{achievement_id}/unlock', desc: 'Unlocking is safe to repeat. If the player already has it, the request returns the original unlocked_at.' },
+    { name: '7. Reward the player', type: 'POST /v1/players/{player_id}/inventory/grants', desc: 'Grant coins or other items. A grant adds an item with no payment.' },
+  ]}
+/>
+
+For a full walk-through of steps 1 to 5 with requests and responses, see [Run a ranked match end to end](/docs/guides/ranked-match).
+
+### Make the end of a round safe to retry
+
+Steps 4 to 7 change data, and a network error can leave you unsure whether a call worked. Send an `Idempotency-Key` on each of them, and build the key from the match so a retry sends the same key.
+
+```text
+end-<match_id>
+score-<match_id>-<player_id>-<leaderboard_id>
+grant-<match_id>-<player_id>
+```
+
+This matters most for a leaderboard with `update_mode` set to `sum` and for grants, because repeating either one would add the points or the items twice. See [Handle errors and retries safely](/docs/guides/errors-and-retries).
+
+## Design the leaderboards
+
+Give each game its own leaderboards. Points from a reaction game and points from a word game are not comparable, so a shared leaderboard would rank one game against the other.
+
+<ParamTable
+  rows={[
+    { name: 'best', type: 'update_mode', desc: 'Keeps the best score. A worse score is accepted but does not change the rank. Use it for a personal best.' },
+    { name: 'sum', type: 'update_mode', desc: 'Adds each new score to the player total. Use it for lifetime points or a count of wins.' },
+    { name: 'latest', type: 'update_mode', desc: 'Keeps the newest score. Use it for a rating that your game recalculates after each match.' },
+    { name: 'weekly', type: 'reset', desc: 'Resets at 00:00 UTC. The reset values are never, daily, weekly and monthly.' },
+  ]}
+/>
+
+Players with equal scores share a rank, and the next rank is not skipped.
+
+Choose leaderboard ids that name the game, for example `reflex_weekly` and `memory_lifetime`. The id is a short key that you choose when you configure the leaderboard.
+
+## Reward and sell
+
+Use two kinds of item. Keep them apart.
+
+<ParamTable
+  rows={[
+    { name: 'Currency or reward', type: 'granted', desc: 'An item such as coins that players earn by playing. Grant it with the grants endpoint. Do not put it on sale. A purchase of an item that is not for sale returns item_not_for_sale.' },
+    { name: 'Consumable', type: 'bought or granted', desc: 'An item that is used up, such as a booster pack. Use the consume endpoint when the player uses one. Consuming more than the player owns returns insufficient_quantity.' },
+    { name: 'Entitlement', type: 'bought', desc: 'A non-consumable item that a player buys and keeps, such as a skin or a season pass. List them with the entitlements endpoint to check access.' },
+  ]}
+/>
+
+For prices, payment tokens and refunds, see [Sell and grant in-game items](/docs/guides/items-and-purchases).
+
+## Keep the game server in charge
+
+Compute scores and results on your game server and send them from there with a secret key (`sk_`). A client that sends its own score can send any score. Publishable keys (`pk_`) are for reading leaderboards and achievements in a game client. See [Authentication](/docs/get-started/authentication).
+
+## Checklist for a new game
+
+- Decide the pattern from the table above, and write down how a round is scored.
+- Create two leaderboards for the game: one for the best score and one for the total. Use ids that name the game.
+- Decide who the second player is when one person plays alone.
+- Build the idempotency keys for the end of a round from the match id.
+- List the achievements that the game can award, and mark any surprise ones as hidden.
+- Decide which items are rewards, which are consumables and which are entitlements.
+- Test with the [sandbox](/docs/get-started/sandbox), including a declined payment and a retry after a failed request.
+
+## Example: Arena Reflex
+
+Arena Reflex is a demo game that follows the score-attack pattern. A round is 20 seconds. It creates a ranked match against a bot player, ends the match with results, submits the score to a best leaderboard and a total leaderboard, unlocks achievements and grants coins. See [SDKs](/docs/sdks) for the code and the demo.
