@@ -88,6 +88,7 @@ Returns `201` and the score. Sends `leaderboard.score_submitted`.
     { name: 'player_not_found', type: '404', desc: 'The player does not exist in this mode.' },
     { name: 'player_suspended', type: '422', desc: 'The player is suspended.' },
     { name: 'invalid_score', type: '422', desc: 'The score is negative or not an integer.' },
+    { name: 'leaderboard_not_found', type: '404', desc: 'The leaderboard does not exist in this mode.' },
   ]}
 />
 
@@ -122,10 +123,23 @@ Returns ranked entries, best first. Works with a publishable key.
 }
 ```
 
+<ParamTable
+  rows={[
+    { name: 'leaderboard_not_found', type: '404', desc: 'The leaderboard does not exist in this mode.' },
+  ]}
+/>
+
 ## Retrieve a player entry
 
 <Endpoint method="GET" path="/v1/leaderboards/{leaderboard_id}/players/{player_id}" />
 
-Returns one player rank and score. Returns `404` with the code `entry_not_found` if the player has no score on this leaderboard.
+Returns one player rank and score.
 
 <Snippets operation="GET /leaderboards/{leaderboard_id}/players/{player_id}" />
+
+<ParamTable
+  rows={[
+    { name: 'entry_not_found', type: '404', desc: 'The player has no score on this leaderboard.' },
+    { name: 'leaderboard_not_found', type: '404', desc: 'The leaderboard does not exist in this mode.' },
+  ]}
+/>

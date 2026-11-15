@@ -63,8 +63,11 @@ export function checkSpec({ root = process.cwd(), docsDir = 'app/docs', specPath
   for (const [p, methods] of Object.entries(spec.paths))
     for (const [m, o] of Object.entries(methods)) specOps.set(`${m.toUpperCase()} /v1${p}`, o)
   const documented = new Set()
+  // Only resources have an `object` field. Plain shapes (a leaderboard entry) are not matched by examples.
   const schemaByObject = Object.fromEntries(
-    Object.values(spec.components.schemas).map((s) => [s.properties.object?.const, s]),
+    Object.values(spec.components.schemas)
+      .filter((s) => s.properties.object?.const)
+      .map((s) => [s.properties.object.const, s]),
   )
 
   // Every operation needs an x-example that fills its path and matches its body schema.

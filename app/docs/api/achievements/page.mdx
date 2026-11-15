@@ -57,6 +57,12 @@ Returns the achievements the player has unlocked, including hidden ones, with th
 
 <Snippets operation="GET /players/{player_id}/achievements" />
 
+<ParamTable
+  rows={[
+    { name: 'player_not_found', type: '404', desc: 'The player does not exist in this mode.' },
+  ]}
+/>
+
 ## Unlock an achievement
 
 <Endpoint method="POST" path="/v1/players/{player_id}/achievements/{achievement_id}/unlock" />
