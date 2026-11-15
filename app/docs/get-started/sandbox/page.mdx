@@ -14,6 +14,16 @@ Every account has a sandbox. Requests made with a `sk_test_` or `pk_test_` key r
 - Rate limits are lower. See [Conventions](/docs/api/conventions#rate-limits).
 - Sandbox data can be reset at any time from the dashboard.
 
+## The demo sandbox
+
+Arena has no hosted service, but the demo sandbox in the [arena-game repository](https://github.com/sabuj000/arena-game) implements every operation in this reference. It runs in your browser or in Node, and the [demo games](https://arena-game-sooty.vercel.app) use it. It is separate from the test mode described on this page:
+
+- It keeps its data in your browser, or in memory in Node. Call `sandbox.reset()` to start again.
+- It has no dashboard. It does not deliver webhooks or enforce rate limits.
+- It has more seed data than listed below, such as a leaderboard for each demo game.
+- It supports `tok_test_success` and `tok_test_declined`, but not `tok_test_slow`.
+- It supports idempotency keys.
+
 ## Test payment tokens
 
 Use these values as `payment_token` when you [create a purchase](/docs/api/purchases#create-a-purchase). No real payment is made.

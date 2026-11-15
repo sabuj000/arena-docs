@@ -8,7 +8,7 @@ export function GET() {
   const lines = [
     '# Arena API',
     '',
-    '> Arena is a fictional REST API for ranked matches, leaderboards, inventory and in-game purchases. It exists to demonstrate a docs-as-code workflow and contains no real product content.',
+    '> Arena is a fictional REST API for ranked matches, leaderboards, inventory and in-game purchases. It exists to demonstrate a docs-as-code workflow and contains no real product content. There is no hosted service, but a demo TypeScript SDK and an in-browser sandbox implement every operation.',
     '',
   ]
   for (const group of nav) {
