@@ -17,7 +17,7 @@ toolkit. It contains no real company content.
 ## Sources of truth ("second SME")
 - **Primary (originates the doc):** The request, ticket or SME text supplied with each task.
 - **API spec (API docs):** `openapi/arena.json`. It is the source of truth for operations, parameters, required flags, limits, enums, error codes and webhook events. If the spec and the request disagree, flag it. Never edit the spec to match a doc unless the request is explicitly an API change.
-- **Code / implementation:** none. Arena is fictional and has no backend.
+- **Code / implementation:** no hosted backend. The demo sandbox in `sabuj000/arena-game` (`sandbox/`) implements the API in the browser, and its contract tests check it against `openapi/arena.json`. Treat it as a second source when the spec is silent, and mark such claims `[unverified]` if only the sandbox shows them.
 - **Product UI:** none.
 
 ## Components & metadata
