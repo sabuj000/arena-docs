@@ -105,6 +105,8 @@ for await (const player of paginate((cursor) => arena.players.list({ limit: 50, 
 
 ## Demo games
 
+You can play the games at [arena-game-sooty.vercel.app](https://arena-game-sooty.vercel.app). The sandbox runs in your browser, so nothing is sent to a real service.
+
 The repository has one hub with five games. They share one player, one inventory and one shop, and each game has its own leaderboards. Every action is an SDK call, and the games show each call as it happens. To use the same approach for other kinds of game, see [Model any type of game with Arena](/docs/guides/game-patterns).
 
 <ParamTable
