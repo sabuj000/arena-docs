@@ -25,8 +25,9 @@ Pick the row that is closest to your game, then adjust.
 <ParamTable
   rows={[
     { name: 'Score attack', type: 'highest score wins', desc: 'A player plays a round alone and gets points, such as a reaction or memory game. Use a leaderboard with sort desc and update_mode best for the top score, and a second one with update_mode sum for total points.' },
+    { name: 'Turn-based, no timer', type: 'highest score wins', desc: 'A puzzle that the player ends when the board is stuck or when they choose to stop. Your server decides when the game is over. Then end the match and submit the final score, as in a score attack.' },
     { name: 'Timed or move-limited', type: 'lowest wins', desc: 'A puzzle scored by time or number of moves. Use a leaderboard with sort asc and update_mode best. Submit the time in milliseconds or the move count as the score. Scores are whole numbers of 0 or more.' },
-    { name: 'Head-to-head', type: 'two players', desc: 'Two players race or fight. Create a match with both, end it with a placement for each, and add to a leaderboard with update_mode sum to count wins.' },
+    { name: 'Head-to-head', type: 'two players', desc: 'Two players race or fight. Create a match with both, end it with a placement for each, and add to a leaderboard with update_mode sum to count wins. When both sides are people, submit a score for each of them. When one side is a bot player, submit scores only for the person.' },
     { name: 'Free-for-all or team', type: 'up to 16 players', desc: 'Set max_players up to 16 and end the match with a placement for every player. Placements start at 1.' },
   ]}
 />
@@ -80,7 +81,7 @@ Give each game its own leaderboards. Points from a reaction game and points from
 
 Players with equal scores share a rank, and the next rank is not skipped.
 
-Choose leaderboard ids that name the game, for example `reflex_weekly` and `memory_lifetime`. The id is a short key that you choose when you configure the leaderboard.
+Choose leaderboard ids that name the game, for example `memory_weekly` and `memory_lifetime`. The id is a short key that you choose when you configure the leaderboard.
 
 ## Reward and sell
 
@@ -110,6 +111,18 @@ Compute scores and results on your game server and send them from there with a s
 - Decide which items are rewards, which are consumables and which are entitlements.
 - Test with the [sandbox](/docs/get-started/sandbox), including a declined payment and a retry after a failed request.
 
-## Example: Arena Reflex
+## Examples: the five demo games
 
-Arena Reflex is a demo game that follows the score-attack pattern. A round is 20 seconds. It creates a ranked match against a bot player, ends the match with results, submits the score to a best leaderboard and a total leaderboard, unlocks achievements and grants coins. See [SDKs](/docs/sdks) for the code and the demo.
+The [arena-game repository](https://github.com/sabuj000/arena-game) has five small games that use the same round. Each one has its own pair of leaderboards.
+
+<ParamTable
+  rows={[
+    { name: 'Arena Reflex', type: 'score attack', desc: 'A 20-second reaction round. The match ends when time is up. Leaderboards: weekly (best) and lifetime (sum).' },
+    { name: 'Memory sequence', type: 'score attack', desc: 'Repeat a growing pattern. The match ends on the first mistake. Leaderboards: memory_weekly and memory_lifetime.' },
+    { name: 'Word scramble', type: 'score attack', desc: 'Unscramble words in 60 seconds. The match ends when time is up. Leaderboards: words_weekly and words_lifetime.' },
+    { name: 'Tile merge', type: 'turn-based, no timer', desc: 'Slide and merge tiles. The match ends when no move is left or the player ends the game. Leaderboards: tiles_weekly and tiles_lifetime.' },
+    { name: 'Quick Draw duel', type: 'head-to-head', desc: 'Press first after the signal. It can be played by one person against a bot player, or by two people on one device. In two-player mode both players get a score, achievements and coins. Leaderboards: duel_weekly and duel_lifetime.' },
+  ]}
+/>
+
+Every game creates a ranked match against a second player, ends it with a placement for each player, submits the score to its best and total leaderboards, unlocks achievements and grants coins. Arena Reflex keeps the leaderboard ids `weekly` and `lifetime` from the first version of the demo. See [SDKs](/docs/sdks) for the SDK and the demo.

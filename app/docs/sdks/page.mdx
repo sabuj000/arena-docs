@@ -11,7 +11,7 @@ export const metadata = {
 
 ## TypeScript SDK (demo)
 
-The TypeScript SDK is generated from the Arena OpenAPI spec and covers all 28 operations in 6 resources. It has no runtime dependencies. It lives in the [arena-game repository](https://github.com/sabuj000/arena-game), together with a sandbox that implements the API and a small game that uses both.
+The TypeScript SDK is generated from the Arena OpenAPI spec and covers all 28 operations in 6 resources. It has no runtime dependencies. It lives in the [arena-game repository](https://github.com/sabuj000/arena-game), together with a sandbox that implements the API and five small games that use both.
 
 There is no package to install. Copy the `sdk/` folder into your project, or clone the repository. The repository runs its TypeScript directly with Node.js 22.6 or later.
 
@@ -35,7 +35,7 @@ console.log(score.rank)
 To point the SDK at a server, leave out `fetch` and set `baseUrl`. The default base URL is `https://api.arena.example/v1`, which does not exist.
 
 <Callout type="warning">
-  Keep secret keys (`sk_`) on your server. The demo game puts a sandbox key in the browser only because the sandbox is not a real service. A real game must never ship a secret key.
+  Keep secret keys (`sk_`) on your server. The demo games put a sandbox key in the browser only because the sandbox is not a real service. A real game must never ship a secret key.
 </Callout>
 
 ### Options
@@ -46,7 +46,7 @@ To point the SDK at a server, leave out `fetch` and set `baseUrl`. The default b
     { name: 'baseUrl', type: 'string', desc: 'The API base URL. Defaults to https://api.arena.example/v1.' },
     { name: 'version', type: 'string', desc: 'Sends the Arena-Version header. If you leave it out, the SDK sends no version header, so your account version applies. The SDK does not pin a version itself.' },
     { name: 'maxRetries', type: 'integer', desc: 'Retries after a failed attempt. The default is 2.' },
-    { name: 'fetch', type: 'function', desc: 'A fetch function to use instead of the global fetch. The game passes the sandbox here.' },
+    { name: 'fetch', type: 'function', desc: 'A fetch function to use instead of the global fetch. The games pass the sandbox here.' },
     { name: 'onRequest', type: 'function', desc: 'Called once per attempt with the method, path, status, duration and attempt number. Use it for logging.' },
   ]}
 />
@@ -103,17 +103,29 @@ for await (const player of paginate((cursor) => arena.players.list({ limit: 50, 
 - The OpenAPI spec does not describe the body of list responses, the leaderboard entry responses, or the achievement unlock response. The SDK defines those types itself, so they can differ from a future spec.
 - The sandbox is not Arena. It is an implementation written for this demo, checked against the spec by a contract test.
 
-## Arena Reflex, a demo game
+## Demo games
 
-Arena Reflex is a 20-second reaction game in the same repository. Each action in it is an SDK call, and the game shows every call as it happens. To use the same approach for other kinds of game, see [Model any type of game with Arena](/docs/guides/game-patterns).
+The repository has one hub with five games. They share one player, one inventory and one shop, and each game has its own leaderboards. Every action is an SDK call, and the games show each call as it happens. To use the same approach for other kinds of game, see [Model any type of game with Arena](/docs/guides/game-patterns).
+
+<ParamTable
+  rows={[
+    { name: 'Arena Reflex', type: 'reaction', desc: 'A 20-second round. A booster pack starts the round with a combo.' },
+    { name: 'Memory sequence', type: 'memory', desc: 'Repeat a growing pattern. A booster pack gives one second chance.' },
+    { name: 'Word scramble', type: 'words', desc: 'Unscramble words in 60 seconds. A booster pack adds 10 seconds.' },
+    { name: 'Tile merge', type: 'puzzle', desc: 'A turn-based sliding puzzle with no timer. A booster pack gives one undo.' },
+    { name: 'Quick Draw duel', type: 'head-to-head', desc: 'Play alone against the system, or with a second player on the same device. A booster pack forgives your first false start.' },
+  ]}
+/>
+
+All five use the same calls.
 
 <ParamTable
   rows={[
     { name: 'Pick a name', type: 'POST /players', desc: 'Shows the invalid_display_name and display_name_taken errors.' },
-    { name: 'Start a match', type: 'POST /matches', desc: 'Creates a ranked match against RivalBot, then starts it.' },
-    { name: 'Finish a round', type: 'POST /matches/{match_id}/end', desc: 'Ends the match, submits the score to the weekly and lifetime leaderboards, unlocks achievements and grants coins.' },
-    { name: 'Use a booster pack', type: 'POST /players/{player_id}/inventory/consume', desc: 'Uses up one item to start a round with a combo.' },
-    { name: 'Shop', type: 'POST /purchases', desc: 'Pays with the test token tok_test_success. The token tok_test_declined shows a decline.' },
+    { name: 'Start a match', type: 'POST /matches', desc: 'Creates a ranked match against a second player, then starts it with POST /matches/{match_id}/start.' },
+    { name: 'Finish a game', type: 'POST /matches/{match_id}/end', desc: 'Ends the match, submits the score to the game leaderboards, unlocks achievements and grants coins.' },
+    { name: 'Use a booster pack', type: 'POST /players/{player_id}/inventory/consume', desc: 'Uses up one item. Each game gives it a different effect.' },
+    { name: 'Shop', type: 'POST /purchases', desc: 'Pays with the test token tok_test_success. The token tok_test_declined shows a decline. A refund calls POST /purchases/{purchase_id}/refund.' },
   ]}
 />
 
