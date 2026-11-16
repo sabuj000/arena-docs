@@ -4,6 +4,8 @@ A docs-as-code demo site for **Arena**, a fictional gaming API (players, matches
 
 Live site: https://arena-docs.vercel.app
 
+**In short:** API docs, SDKs and examples drift apart, and nobody notices until a developer hits the gap. This demo keeps them tied together. The OpenAPI spec is the source of truth. CI checks the docs against it. A TypeScript SDK is generated from it ([arena-game](https://github.com/sabuj000/arena-game)). A sandbox that implements all 28 operations runs in the browser and is contract-tested against it. Nightly checks catch the copies falling behind. You can [send a request to the sandbox from your browser](https://sabuj000.github.io/Portfolio/arena-api.html). There is no hosted service and no usage data, so this shows the workflow, not outcomes.
+
 ## What this demo shows
 
 Documentation treated as code, with an AI agent in the loop and checks that do not depend on trust.
@@ -20,12 +22,12 @@ Documentation treated as code, with an AI agent in the loop and checks that do n
 |---|---|
 | `npm run check:docs` | Pages missing from the nav, missing metadata, markdown tables, empty table descriptions, broken links and anchors |
 | `npm run check:spec` | Docs that disagree with `openapi/arena.json`: endpoints, parameters, required flags, limits, enums, error codes, webhook events, JSON example keys |
-| `npm run test:seeded` | Plants 14 known mistakes in a temporary copy of the docs and confirms the checker catches each one |
+| `npm run test:seeded` | Plants 15 known mistakes in a temporary copy of the docs and confirms the checker catches each one |
 | Build | `next build` fails on broken MDX |
 
 ### What the numbers mean
 
-The seeded test catches 14 of 14 planted mistakes. I wrote those mistakes, so this proves the checker works. It does not measure how accurate an AI reviewer is. The checker verifies tables, parameters, error codes and JSON examples. It does not read free prose for wrong claims, and the spec has no definitions for idempotency or rate limits, so those pages are checked for structure only.
+The seeded test catches 15 of 15 planted mistakes. I wrote those mistakes, so this proves the checker works. It does not measure how accurate an AI reviewer is. The checker verifies tables, parameters, error codes and JSON examples. It does not read free prose for wrong claims, and the spec has no definitions for idempotency or rate limits, so those pages are checked for structure only.
 
 ## Stack
 
